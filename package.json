@@ -1,0 +1,10 @@
+{
+  "name": "fitcheck-demo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "FitCheck: an independent student concept for a fair first trial of a new product.",
+  "dependencies": {
+    "@vercel/functions": "^3.0.0"
+  },
+  "engines": { "node": ">=18" }
+}
