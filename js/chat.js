@@ -4,7 +4,7 @@
   var E = window.FitEngine;
   var sleep = function (ms) { return new Promise(function (r) { setTimeout(r, ms); }); };
   var esc = function (s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
-  var fmt = function (s) { return esc(s).replace(/\*([^*\n]+)\*/g, '<b>$1</b>'); };
+  var fmt = function (s) { return esc(s).replace(/\*([^*\n]+)\*/g, '<b>$1</b>').replace(/(^|[\s(])_([^_\n]+)_(?=[\s).,!?]|$)/g, '$1<i>$2</i>'); };
 
   function mount(root, ids) {
     var token = {};
@@ -12,7 +12,7 @@
     var state = null, skip = false, busy = false;
     root.innerHTML =
       '<div class="phone" aria-label="WhatsApp-style simulation"><div class="phone-in">' +
-      '<div class="chat-h"><div class="av"><svg viewBox="0 0 32 32"><path d="M9 16.5l4.5 4.5L23 11" stroke="#128C7E" stroke-width="3.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div><b>FitCheck</b><small>independent concept · simulation</small></div></div>' +
+      '<div class="chat-h"><div class="av"><svg viewBox="0 0 32 32"><path d="M9 16.5l4.5 4.5L23 11" stroke="#128C7E" stroke-width="3.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div><b>FitCheck</b><small>online · browser preview</small></div></div>' +
       '<div class="skipbar" id="skipbar" hidden><span id="skiptxt"></span><button type="button" id="skipbtn">Skip the wait</button></div>' +
       '<div class="msgs" id="msgs" role="log" aria-live="polite"></div>' +
       '<form class="composer" id="composer" autocomplete="off"><input id="txt" type="text" maxlength="200" placeholder="Type a message" aria-label="Type a message"><button type="submit" aria-label="Send"><svg viewBox="0 0 24 24" width="18" height="18" fill="#fff"><path d="M3 20l18-8L3 4v6l11 2-11 2z"/></svg></button></form>' +
@@ -78,7 +78,7 @@
     };
 
     (async function init() {
-      bubble('sys', 'This is a simulation in your browser. The real WhatsApp version works the same way.');
+      bubble('sys', 'Browser preview. The WhatsApp version runs the same conversation.');
       var r = E.startSession(ids, { siteUrl: location.origin });
       state = r.state; report(r.events);
       await play(r.out);
