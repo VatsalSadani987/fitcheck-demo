@@ -86,6 +86,17 @@
       swap: []
     }
   };
+  /* Display helpers: a friendly short name for chat, shop categories, whether the steps are a numbered sequence. */
+  var EXTRA = {
+    sa1:   { nick: '1% salicylic body wash', cats: ['body', 'acne'], ordered: true,  emoji: '🧴' },
+    aha5:  { nick: '5% AHA BHA body wash',   cats: ['body'],         ordered: true,  emoji: '🧴' },
+    roll:  { nick: 'underarm roll-on',       cats: ['body'],         ordered: false, emoji: '💧' },
+    gum:   { nick: 'hair health gummies',    cats: ['hair'],         ordered: false, emoji: '🍬' },
+    serum: { nick: 'hair growth serum',      cats: ['hair'],         ordered: false, emoji: '💆' },
+    spot:  { nick: '2% salicylic gel',       cats: ['acne'],         ordered: false, emoji: '🧪' }
+  };
+  Object.keys(EXTRA).forEach(function (k) { Object.keys(EXTRA[k]).forEach(function (f) { PRODUCTS[k][f] = EXTRA[k][f]; }); });
+  var CATS = [['all', 'Shop all'], ['body', 'Body care'], ['hair', 'Hair care'], ['acne', 'Acne care']];
   var ORDER = ['sa1', 'aha5', 'roll', 'gum', 'serum', 'spot'];
-  return { PRODUCTS: PRODUCTS, ORDER: ORDER, NOT_STATED: NS };
+  return { PRODUCTS: PRODUCTS, ORDER: ORDER, CATS: CATS, NOT_STATED: NS };
 });
