@@ -1,14 +1,14 @@
-# FitCheck (independent concept)
+# Be.Bodywise sample idea: FitCheck
 
-A demo store plus a WhatsApp check-in that helps a customer give a new product a fair trial.
-Built for the Mosaic Wellness Fellowship Builder Challenge. Not affiliated with Be.Bodywise or Mosaic Wellness.
+A sample idea by Vatsal Sadani (St. Xavier's College (Autonomous), Kolkata) for the Mosaic Wellness Fellowship Builder Challenge.
 
-## What is inside
-- `index.html`, `css/`, `js/`: the demo store (browse, product guide, cart, checkout, browser chat, team view).
-- `data/products.js`: product guides, taken from the pack photos and public listing pages. Gaps are marked "not stated".
-- `lib/engine.js`: one conversation engine used by both the browser chat and WhatsApp.
-- `api/whatsapp.js`: the WhatsApp webhook (Kapso). `api/event.js`, `api/stats.js`: anonymous counts for the team view.
-- No phone numbers are stored. State is keyed by a salted hash and expires after 2 hours.
+- `index.html`, `css/`, `js/`: the demo store, FitCheck page, browser chat and Insights dashboard (no build step).
+- `data/products.js`: product guide data (from pack photos and public pages; gaps are marked "not stated").
+- `lib/engine.js`: the conversation engine. The same code runs in the browser and on WhatsApp.
+- `api/whatsapp.js`: Kapso webhook that replies on WhatsApp. `api/event.js`, `api/stats.js`: anonymous events and live counts.
+- `api/summary.js`: optional AI summary (Gemini). `api/reset.js`: clears test data (needs ADMIN_KEY).
+- `lib/store.js`: Upstash Redis storage (anonymous counters, redacted notes, short-lived chat state).
 
-## Settings (Vercel > Settings > Environment Variables)
-See `.env.example`. Real values are never committed to the code.
+Setup: see `.env.example`. Deploy on Vercel, connect an Upstash Redis database, add the Kapso webhook
+`https://<your-site>/api/whatsapp` for the event `whatsapp.message.received`, then redeploy.
+No phone numbers or names are stored. Demo prices only. Not medical advice.
