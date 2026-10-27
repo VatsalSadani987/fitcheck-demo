@@ -96,6 +96,99 @@
     spot:  { nick: '2% salicylic gel',       cats: ['acne'],         ordered: false, emoji: '🧪' }
   };
   Object.keys(EXTRA).forEach(function (k) { Object.keys(EXTRA[k]).forEach(function (f) { PRODUCTS[k][f] = EXTRA[k][f]; }); });
+
+  /* Hinglish (Roman script) versions of the guide text, used by the chat only. Gender-neutral wording on purpose.
+     Meaning is kept identical to the English text above. Please have a Hindi reader check every line before sharing. */
+  var NS_HI = 'Humne jo pages dekhe, unme yeh nahi likha. Apna pack check karein.';
+  var HI = {
+    sa1: {
+      nick: '1% salicylic body wash',
+      forShort: 'Body acne se bachane mein madad karta hai aur dead skin cells ko exfoliate karta hai.',
+      how: ['Skin ko geela karein.', 'Thoda wash hatheli ya loofah par lein.', 'Gol-gol ghumate hue halke haath se massage karein.', 'Dho lein.'],
+      judge: 'Listing ke mutabik best results ke liye lagbhag 3 mahine tak regular use karein. Results har insaan mein alag hote hain.',
+      good: ['Skin sensitive ho to pehle patch test karein.', 'Yeh body ke liye hai. Face par lagane se pehle apna pack check karein.', 'Skin dry lage to baad mein moisturiser lagayein.']
+    },
+    aha5: {
+      nick: '5% AHA BHA body wash',
+      forShort: 'Exfoliate aur hydrate karta hai; tan hatane aur skin tone brighten karne mein madad karta hai.',
+      how: ['Geeli skin par thoda wash hatheli ya loofah par lein.', 'Gol-gol ghumate hue halke haath se massage karein.', 'Dho lein.'],
+      judge: 'Pack aur brand page ke mutabik best results lagbhag 3 mahine mein dikhte hain.',
+      good: ['Brand page routine mein shamil karne se pehle patch test karne ko kehta hai.', 'Sirf bahari use ke liye. Aankhon se door rakhein.', 'Thandi, sookhi jagah par, dhoop se door rakhein.']
+    },
+    roll: {
+      nick: 'underarm roll-on',
+      forShort: 'Body odour control karne aur hyperpigmentation kam karne mein madad karta hai.',
+      how: ['Underarm ki skin par lagayein.', 'Barabar roll karein.', 'Kapde pehenne se pehle poori tarah sookhne dein.', 'Is exact roll-on ki directions humne dekhe hue pages par nahi payi. Milte-julte roll-on ki listing yahi kehti hai, isliye apna pack zaroor check karein.'],
+      judge: NS_HI,
+      good: ['Kati-phati ya irritated skin par na lagayein.', 'Patch test karna sahi rahega.', 'Sirf bahari use ke liye. Medical use ke liye nahi.']
+    },
+    gum: {
+      nick: 'hair health gummies',
+      forShort: 'Roz ka ek nutraceutical gummy jo baalon ko majboot karne aur hair fall control karne mein madad karta hai.',
+      how: ['Roz 1 gummy lein, ya apne healthcare professional ke batane ke mutabik.', 'Listing ke mutabik ise subah ya shaam, khane ke baad le sakte hain.', 'Recommended matra se zyada na lein.'],
+      judge: NS_HI,
+      good: ['Yeh medicinal use ke liye nahi hai. Yeh kisi condition ko diagnose, treat ya cure karne ke liye nahi hai.', 'Thandi, sookhi jagah par, dhoop se door aur bachchon ki pahunch se bahar rakhein.', 'Pata na ho ki yeh aapke liye theek hai ya nahi, to healthcare professional se poochhein.']
+    },
+    serum: {
+      nick: 'hair growth serum',
+      forShort: 'Leave-in scalp serum, hair fall aur patle hote baalon ke liye.',
+      how: ['Saaf, sookhi scalp par use karein.', 'Label par 1 ml ke nishaan tak pahunchne tak scalp par kai baar roll karein.', 'Listing din mein do baar, lagbhag 2 minute massage ke saath, suggest karti hai.'],
+      judge: 'Listing kehti hai ki visible farak dekhne ke liye kam se kam 3 se 4 mahine lagataar use karein.',
+      good: ['Sirf bahari use ke liye. Haath par lage to haath dho lein.', 'Zyada garmi mein tel alag ho sakta hai. Listing ke mutabik use se pehle achhe se hila lein.', 'Use se pehle label zaroor padhein.']
+    },
+    spot: {
+      nick: '2% salicylic gel',
+      forShort: 'Acne manage karne aur acne ki inflammation kam karne mein madad karta hai.',
+      how: ['Step-by-step directions, matra aur kitni baar lagana hai, yeh humne dekhe hue pages par nahi payi.', 'Listing ke mutabik ise din ya raat mein use kar sakte hain aur yeh koi residue nahi chhodta.', 'Kaise lagana hai, iske liye apne pack ka label dekhein.'],
+      judge: 'Listing ka dava hai ki pimples kuch din mein aur acne lagbhag ek hafte mein behtar dikh sakte hain, aur nishaan lagbhag 2 mahine mein halke padte hain. Yeh banane wale ke dave hain aur results alag ho sakte hain.',
+      good: ['Listing ke mutabik yeh normal, combination aur oily skin ko suit karta hai, aur dry ya sensitive skin ke liye kam strength suggest karti hai.', 'Use se pehle label aur directions padhein.', 'Yahan dikhayi gayi price demo price hai.']
+    }
+  };
+  Object.keys(HI).forEach(function (k) { PRODUCTS[k].hi = HI[k]; });
+  /* Days the pack or listing points to before judging. Only set where a page actually says so; otherwise no progress bar is shown. */
+  var TRIAL = { sa1: 90, aha5: 90, serum: 90 };
+  Object.keys(TRIAL).forEach(function (k) { PRODUCTS[k].trialDays = TRIAL[k]; });
+
+  /* Hinglish (Roman Hindi mixed with English) wording for the WhatsApp chat. Same facts as the English guide, simple words. */
+  var HI = {
+    sa1: {
+      forShort: 'Body acne se bachne mein madad karta hai aur dead skin cells ko exfoliate karta hai.',
+      how: ['Skin ko geela kijiye.', 'Hatheli ya loofah par thoda wash lijiye.', 'Gol gol ghumate hue halke haath se malish kijiye.', 'Paani se dho lijiye.'],
+      judge: 'Listing ke hisaab se best results ke liye lagbhag 3 mahine tak regular use karna chahiye. Results har insaan mein alag ho sakte hain.',
+      good: ['Agar skin sensitive hai to pehle patch test kijiye.', 'Ye body ke liye hai. Chehre par lagane se pehle apna pack check kijiye.', 'Skin dry lage to baad mein moisturiser lagaiye.']
+    },
+    aha5: {
+      forShort: 'Exfoliate aur hydrate karta hai; de-tan karne aur skin tone brighten karne mein madad karta hai.',
+      how: ['Geeli skin par hatheli ya loofah mein thoda wash lijiye.', 'Halke haath se gol gol malish kijiye.', 'Paani se dho lijiye.'],
+      judge: 'Pack aur brand page ke hisaab se best results lagbhag 3 mahine mein dikhte hain.',
+      good: ['Brand page kehta hai ki routine mein jodne se pehle patch test kijiye.', 'Sirf bahari use ke liye. Aankhon se door rakhein.', 'Thandi, sukhi jagah par, dhoop se door rakhein.']
+    },
+    roll: {
+      forShort: 'Body odour control karne aur hyperpigmentation kam karne mein madad karta hai.',
+      how: ['Underarm ki skin par lagaiye.', 'Barabar roll kijiye.', 'Kapde pehnne se pehle poori tarah sukhne dijiye.', 'Is roll-on ki exact directions humne dekhe hue pages par nahi payi. Milta-julta roll-on listing yahi kehti hai, to apna pack check kijiye.'],
+      judge: 'Humne jo pages dekhe unmein ye nahi likha. Apna pack check kijiye.',
+      good: ['Tooti hui ya irritated skin par na lagayein.', 'Patch test karna accha rahega.', 'Sirf bahari use ke liye. Medical use ke liye nahi.']
+    },
+    gum: {
+      forShort: 'Roz ki nutraceutical gummy jo baalon ko strong karne aur hair fall control karne mein madad karti hai.',
+      how: ['Roz 1 gummy lijiye, ya apne healthcare professional ke kehne ke hisaab se.', 'Listing ke hisaab se ise subah ya shaam, khane ke baad le sakte hain.', 'Recommended matra se zyada na lein.'],
+      judge: 'Humne jo pages dekhe unmein ye nahi likha. Apna pack check kijiye.',
+      good: ['Medicinal use ke liye nahi hai. Ye kisi bimari ko diagnose, treat ya cure karne ke liye nahi hai.', 'Thandi, sukhi jagah par, dhoop se door aur bachchon ki pahunch se door rakhein.', 'Pata na ho ki ye aapke liye theek hai ya nahi, to healthcare professional se poochiye.']
+    },
+    serum: {
+      forShort: 'Leave-in scalp serum jo hair fall aur patle hote baalon ke liye hai.',
+      how: ['Saaf, sukhi scalp par use kijiye.', 'Label par 1 ml ke nishan tak pahunchne tak scalp par kai baar roll kijiye.', 'Listing din mein do baar aur lagbhag 2 minute massage karne ko kehti hai.'],
+      judge: 'Listing kehti hai ki fark dikhne ke liye kam se kam 3 se 4 mahine lagataar use kijiye.',
+      good: ['Sirf bahari use ke liye. Haath mein lag jaye to haath dho lijiye.', 'Zyada garmi mein oil alag ho sakta hai. Listing ke hisaab se use se pehle achhe se hila lijiye.', 'Use karne se pehle label padh lijiye.']
+    },
+    spot: {
+      forShort: 'Acne manage karne aur acne ki inflammation kam karne mein madad karta hai.',
+      how: ['Step-by-step directions, kitna lagana hai aur kitni baar, ye humne dekhe hue pages par nahi payi.', 'Listing kehti hai ki ise din ya raat mein use kar sakte hain aur ye residue nahi chhodta.', 'Kaise lagana hai, iske liye apne pack ka label dekhiye.'],
+      judge: 'Listing ka dawa hai ki pimples kuch dinon mein aur acne lagbhag ek hafte mein behtar dikh sakta hai, aur daag lagbhag 2 mahine mein halke hote hain. Ye banane wale ke dawe hain aur results alag ho sakte hain.',
+      good: ['Listing ke hisaab se ye normal, combination aur oily skin ke liye theek hai; dry ya sensitive skin ke liye kam strength suggest karti hai.', 'Use karne se pehle label aur directions padh lijiye.', 'Yahan dikhayi gayi price demo price hai.']
+    }
+  };
+  Object.keys(HI).forEach(function (k) { PRODUCTS[k].hi = HI[k]; });
   var CATS = [['all', 'Shop all'], ['body', 'Body care'], ['hair', 'Hair care'], ['acne', 'Acne care']];
   var ORDER = ['sa1', 'aha5', 'roll', 'gum', 'serum', 'spot'];
   return { PRODUCTS: PRODUCTS, ORDER: ORDER, CATS: CATS, NOT_STATED: NS };
