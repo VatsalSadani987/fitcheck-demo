@@ -136,7 +136,7 @@
     var wa = c['src:whatsapp'] || 0, web = c['src:web'] || 0;
     var q1 = series(L.q1, c, 'q1'), vd = series(L.verdict, c, 'verdict'), us = series(L.use, c, 'use');
     var rs = Object.keys(L.reason).map(function (k) { return { label: L.reason[k], value: c['reason:' + k] || 0 }; }).sort(function (a, b) { return b.value - a.value; });
-    var kpis = '<div class="kpis"><div class="kpi"><b>' + (c.sessions || 0) + '</b><span>check-in sessions<br>WhatsApp ' + wa + ' · browser ' + web + '</span></div>' +
+    var kpis = '<div class="kpis"><div class="kpi"><b>' + (c.sessions || 0) + '</b><span>check-in sessions<br>WhatsApp ' + wa + ' · browser ' + web + ((c['lang:hi'] || c['lang:en']) ? '<br>Hinglish ' + (c['lang:hi'] || 0) + ' · English ' + (c['lang:en'] || 0) : '') + '</span></div>' +
       '<div class="kpi"><b>' + pct(c['q1:well'] || 0, answered) + '%</b><span>said it is working well</span></div>' +
       '<div class="kpi"><b>' + pct(low, answered) + '%</b><span>had no change, a mismatch or irritation</span></div>' +
       '<div class="kpi"><b>' + pct(c.shared || 0, verdicts) + '%</b><span>chose to tell the brand</span></div></div>';
@@ -185,15 +185,26 @@
     return rows.map(function (r) { return r.map(function (v) { v = String(v == null ? '' : v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }).join(','); }).join('\n');
   }
 
-  function loadAi(d) {
-    var box = $('#aiBox'); if (!box) return;
-    fetch('api/summary').then(function (r) { return r.ok ? r.json() : null; }).then(function (s) {
-      if (!s || s.source !== 'gemini' || !$('#aiBox')) return;
-      $('#aiBox').innerHTML = '<span class="tag">AI summary · Gemini</span><p style="font-weight:700;margin:0 0 6px">' + esc(s.headline) + '</p>' +
+  var lastJson = '', lastAi = null, aiTry = 0;
+
+  function renderAi(s) {
+    var box = $('#aiBox'); if (!box || !s) return;
+    if (s.source === 'gemini') {
+      box.innerHTML = '<span class="tag">AI summary · Gemini</span><p style="font-weight:700;margin:0 0 6px">' + esc(s.headline) + '</p>' +
         '<ul>' + s.themes.map(function (t) { return '<li><b>' + esc(t.title) + ':</b> ' + esc(t.detail) + '</li>'; }).join('') + '</ul>' +
         (s.actions && s.actions.length ? '<p style="margin:10px 0 2px;font-weight:700">Suggested actions</p><ul>' + s.actions.map(function (a) { return '<li>' + esc(a) + '</li>'; }).join('') + '</ul>' : '') +
         '<p class="muted" style="font-size:.78rem;margin:8px 0 0">Written by an AI model from the anonymous numbers and notes above. Check against the data before acting.</p>';
-    }).catch(function () { /* keep the rule-based summary */ });
+    } else if (s.error) {
+      box.insertAdjacentHTML('beforeend', '<p class="muted" style="font-size:.78rem;margin:8px 0 0">AI summary unavailable: ' + esc(s.error) + ' (showing the built-in summary).</p>');
+    }
+  }
+  function loadAi() {
+    aiTry = Date.now();
+    fetch('api/summary').then(function (r) { return r.ok ? r.json() : null; }).then(function (s) {
+      if (!s) return;
+      lastAi = (s.source === 'gemini' || s.error) ? s : null;
+      renderAi(lastAi);
+    }).catch(function () { /* keep the built-in summary */ });
   }
 
   function mount() {
@@ -206,18 +217,28 @@
       };
       var rb = $('#resetBtn'); if (rb) rb.onclick = function () {
         var k = window.prompt('Enter the admin key (ADMIN_KEY in Vercel) to clear the live test data:'); if (!k) return;
-        fetch('api/reset', { method: 'POST', headers: { 'x-admin-key': k } }).then(function (r) { return r.json(); }).then(function (j) { window.alert(j.ok ? 'Cleared.' : (j.error || 'Could not clear.')); poll(); }).catch(function () { window.alert('Could not reach the server.'); });
+        fetch('api/reset', { method: 'POST', headers: { 'x-admin-key': k } }).then(function (r) { return r.json(); }).then(function (j) { window.alert(j.ok ? 'Cleared.' : (j.error || 'Could not clear.')); lastJson = ''; lastAi = null; poll(); }).catch(function () { window.alert('Could not reach the server.'); });
       };
-      if (!sample && (d.counts || {}).sessions && (d.counts.sessions !== lastTotal)) { lastTotal = d.counts.sessions; loadAi(d); }
+      if (!sample && (d.counts || {}).sessions) {
+        if (lastAi) renderAi(lastAi);
+        var failed = !lastAi || lastAi.source !== 'gemini';
+        if (d.counts.sessions !== lastTotal || (failed && Date.now() - aiTry > 60000)) { lastTotal = d.counts.sessions; loadAi(); }
+      }
     }
     function poll() {
       if (mode !== 'live') return;
       fetch('api/stats', { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : Promise.reject(); })
-        .then(function (d) { if (mode !== 'live' || !$('#insBody')) return; paint(d, false); stamp.textContent = 'Updated ' + new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' }); })
+        .then(function (d) {
+          if (mode !== 'live' || !$('#insBody')) return;
+          var sig = JSON.stringify([d.counts, (d.notes || []).length, (d.feed || []).length && d.feed[0].t, d.configured, d.error]);
+          if (sig !== lastJson) { lastJson = sig; paint(d, false); } // only redraw when something changed, so open sections and hovers are not reset
+          else { var f = $('.feed'); if (f && d.feed) f.outerHTML = feedHtml(d.feed, false); }
+          stamp.textContent = 'Updated ' + new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        })
         .catch(function () { if (mode === 'live' && $('#insBody') && !lastData) { el.innerHTML = '<div class="warnbox">Could not load live data. If you are running this page from a file, open the deployed site instead.</div>'; } });
     }
     function show(which) {
-      mode = which; lastTotal = -1; lastData = null;
+      mode = which; lastTotal = -1; lastData = null; lastJson = '';
       document.querySelectorAll('[data-seg]').forEach(function (b) { b.classList.toggle('on', b.dataset.seg === which); });
       clearInterval(timer);
       if (which === 'sample') { tag.innerHTML = '<span class="sample-pill">SAMPLE DATA, INVENTED FOR ILLUSTRATION</span>'; stamp.textContent = ''; paint(buildSample(), true); return; }
