@@ -199,7 +199,7 @@
       '<div class="card"><h3>2. A check-in at the right time</h3><p class="muted" style="margin:0">A short, friendly WhatsApp message around the day the product should start to show. Tap an answer, or type it. In this demo it arrives after 30 seconds instead of two weeks.</p></div>' +
       '<div class="card"><h3>3. An honest next step</h3><p class="muted" style="margin:0">Fixed rules decide the verdict, not a chatbot guessing. Customers can add more than one reason and, if they like, tell the brand anonymously.</p></div></div>' +
       '<h2>The six verdicts</h2><div class="tablewrap"><table class="t"><tr><th>Verdict</th><th>When</th><th>What FitCheck says</th></tr>' + verdicts.map(function (v) { return '<tr><td><b>' + v[0] + '</b></td><td>' + v[1] + '</td><td>' + v[2] + '</td></tr>'; }).join('') + '</table></div>' +
-      '<div class="card" style="margin-top:22px;display:flex;gap:18px;align-items:center;flex-wrap:wrap;justify-content:space-between"><div><h3 style="margin:0 0 4px">What the brand gets</h3><p class="muted" style="margin:0;max-width:40em">Why products disappoint, which products need clearer directions, and what is working, as live anonymous charts.</p></div><a class="btn fc" href="#/insights">See the Insights dashboard</a></div>';
+      '<div class="card" style="margin-top:22px;display:flex;gap:18px;align-items:center;flex-wrap:wrap;justify-content:space-between"><div><h3 style="margin:0 0 4px">What the brand gets</h3><p class="muted" style="margin:0;max-width:40em">Why products disappoint, which products need clearer directions, and what is working, as live anonymous charts.</p></div><a class="btn fc" href="#/insights">See the Insights dashboard</a></div>' + aboutBlock();
   }
 
   function viewChat(q) {
@@ -215,22 +215,21 @@
       '<div id="chatRoot"></div></div>';
   }
 
-  function viewAbout() {
-    return '<span class="eyebrow"><span class="fcdot"></span>About the idea</span><h1 style="margin-top:8px">A fair first trial, and a way for the brand to learn why</h1>' +
-      '<p class="muted" style="max-width:48em">A sample idea by Vatsal Sadani (St. Xavier’s College (Autonomous), Kolkata) for the Mosaic Wellness Fellowship Builder Challenge. It began with seven real customer conversations about Be.Bodywise. No names or phone numbers are used here.</p>' +
-      '<div class="cols" style="margin:20px 0"><div class="card"><h3>What the conversations showed</h3><ul><li>Most customers found a product that worked, and tried it because of reviews, a friend or a claim.</li><li>The same product worked for some and not for others.</li><li>One customer said usage guidance was missing.</li><li>The first four customers knew how to contact the brand, but did not think to.</li></ul></div>' +
-      '<div class="card"><h3>The problem chosen</h3><p>When a product disappoints, nothing prompts customers, or makes it easy in the moment, to say so. They quietly drop it or switch, and the brand never learns why.</p><p class="muted" style="font-size:.88rem;margin:0">Seven conversations are thin evidence. This is an opportunity, not a proven problem.</p></div>' +
-      '<div class="card"><h3>What FitCheck does</h3><ol style="padding-left:1.2em;margin:0"><li>A clear guide on the product page.</li><li>A check-in on WhatsApp at the right moment.</li><li>An honest verdict: keep going, wait longer, adjust usage, consider a swap, or see a doctor.</li><li>An optional anonymous note for the brand.</li></ol></div></div>' +
-      '<h2>What is real and what is simulated</h2><div class="tablewrap"><table class="t"><tr><th>Part</th><th>Status</th></tr>' +
+  /* Short "idea" sections, shown at the bottom of the FitCheck page (no separate About page). */
+  function aboutBlock() {
+    return '<h2 style="margin-top:36px">Why FitCheck exists</h2>' +
+      '<div class="cols"><div class="card"><h3>The problem</h3><p style="margin:0">When a product disappoints, nothing prompts customers, or makes it easy in the moment, to say so. They quietly drop it or switch, and the brand never learns why.</p></div>' +
+      '<div class="card"><h3>Where it comes from</h3><p style="margin:0">Seven real customer conversations about Be.Bodywise (no names or numbers are used here). Most found a product that worked, but the same product worked for some and not for others, and one said usage guidance was missing.</p></div>' +
+      '<div class="card"><h3>How sure are we?</h3><p style="margin:0">Seven conversations are thin evidence. This is an opportunity worth testing, not a proven problem.</p></div></div>' +
+      '<h2 style="margin-top:28px">What is real and what is simulated</h2><div class="tablewrap"><table class="t"><tr><th>Part</th><th>Status</th></tr>' +
       '<tr><td>Product guide</td><td>Real information from the pack and public pages. Gaps are marked as not stated.</td></tr>' +
       '<tr><td>WhatsApp check-in</td><td>Real WhatsApp messages from a demo line. The 30 second wait stands in for one to two weeks.</td></tr>' +
       '<tr><td>Store, cart, payment</td><td>Simulated. No real orders, payments or deliveries, and no personal details collected.</td></tr>' +
       '<tr><td>Verdicts and medical guidance</td><td>Fixed, reviewed text. It never diagnoses. Irritation always means stop and see a doctor.</td></tr>' +
-      '<tr><td>Insights</td><td>Live tab: anonymous answers from real demo sessions, stored in a database. Sample tab: invented data, clearly labelled.</td></tr>' +
-      '<tr><td>Prices and product photos</td><td>Demo prices. Photos and names belong to their owners and are shown for demonstration.</td></tr></table></div>' +
+      '<tr><td>Insights</td><td>Live tab: anonymous answers from real demo sessions. Sample tab: invented data, clearly labelled.</td></tr>' +
+      '<tr><td>Prices and photos</td><td>Demo prices. Photos and names belong to their owners and are shown for demonstration.</td></tr></table></div>' +
       '<h2 style="margin-top:28px">If this were built for real</h2><ul><li>Trigger each check-in from real delivery dates, not a fixed 30 second wait.</li><li>Offer Hinglish and other languages, since many customers chat that way.</li><li>Connect the verdict and reason tags to the support and product teams’ tools.</li><li>A/B test the check-in wording and timing.</li></ul>' +
-      '<h2 style="margin-top:28px">Privacy</h2><p>The site never asks for a phone number. When someone messages the WhatsApp line, WhatsApp shares their number with it only so it can reply. A short-lived conversation state is kept under a scrambled key for two hours. Only anonymous counts and redacted notes are kept.</p>' +
-      '<p class="muted" style="font-size:.88rem">Built with an AI coding assistant (Claude), with the research, product thinking and decisions by the author.</p>';
+      '<p class="muted" style="font-size:.86rem;margin-top:20px">Privacy: the site never asks for a phone number. WhatsApp shares a customer’s number with the FitCheck line only so it can reply. Chat state is kept under a scrambled key for two hours; only anonymous counts and redacted notes are kept. Built with an AI coding assistant (Claude), with the research, product thinking and decisions by the author.</p>';
   }
 
   function viewNotFound() { return '<div class="empty"><h1>Page not found</h1><a class="btn" href="#/">Back to the store</a></div>'; }
@@ -251,13 +250,13 @@
     else if (view === 'done') html = viewDone();
     else if (view === 'fitcheck') html = viewFitCheck();
     else if (view === 'chat') html = viewChat(q);
-    else if (view === 'about' || view === 'how') { view = 'about'; html = viewAbout(); }
+    else if (view === 'about' || view === 'how') { location.replace('#/fitcheck'); return; }
     else if (view === 'insights') html = window.FitInsights.view();
     else html = viewNotFound();
     app.innerHTML = html;
     var navKey = (view === 'p' || view === 'home' || view === 'cart' || view === 'checkout' || view === 'done') ? 'home' : (view === 'chat' ? 'fitcheck' : view);
     document.querySelectorAll('[data-nav]').forEach(function (a) { a.classList.toggle('on', a.dataset.nav === navKey); });
-    var titles = { home: 'Shop', fitcheck: 'FitCheck', chat: 'Try FitCheck', about: 'About the idea', insights: 'FitCheck Insights', cart: 'Your cart', checkout: 'Checkout', done: 'Order placed' };
+    var titles = { home: 'Shop', fitcheck: 'FitCheck', chat: 'Try FitCheck', insights: 'FitCheck Insights', cart: 'Your cart', checkout: 'Checkout', done: 'Order placed' };
     document.title = (view === 'p' && PRODUCTS[parts[1]] ? PRODUCTS[parts[1]].name : (titles[view] || 'Page not found')) + ' · Be.Bodywise sample idea';
     $('#searchInput').value = view === 'home' ? S.q : '';
     window.scrollTo(0, 0); badge();
