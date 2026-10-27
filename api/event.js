@@ -4,7 +4,7 @@ const Engine = require('../lib/engine.js');
 const store = require('../lib/store.js');
 const P = require('../data/products.js');
 
-const NAMES = ['session_start', 'q1', 'use', 'reason', 'verdict', 'shared', 'note', 'session_end'];
+const NAMES = ['session_start', 'lang', 'q1', 'use', 'reason', 'verdict', 'shared', 'note', 'session_end'];
 const token = (v) => (typeof v === 'string' ? v.replace(/[^a-z0-9_]/gi, '').slice(0, 20) : '');
 
 module.exports = async function handler(req, res) {
