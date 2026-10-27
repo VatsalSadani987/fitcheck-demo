@@ -60,7 +60,13 @@ async function handle(evt, cfg) {
   if (!inbound) return;
   if (inbound.msgId && !(await store.once('m:' + inbound.msgId, 900))) return; // duplicate delivery
   const state = await store.getState(inbound.phone);
-  const result = Engine.reply(state, { id: inbound.id, text: inbound.text }, cfg);
+  const c = Object.assign({}, cfg);
+  const tok = /#([A-HJ-NP-Z2-9]{5})\b/i.exec(inbound.text || '');
+  if (tok && Engine.parseRef(inbound.text).length) {
+    const rec = await store.getReceipt(tok[1]).catch(() => null);
+    if (rec && rec.p) c.receipt = rec.p;
+  }
+  const result = Engine.reply(state, { id: inbound.id, text: inbound.text }, c);
   if (result.state) await store.setState(inbound.phone, result.state);
   await store.record(result.events, 'whatsapp');
   await sendAll(inbound.phone, result.out);

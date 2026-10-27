@@ -5,8 +5,8 @@
    Optional: set GEMINI_MODEL to force one. Open /api/summary?debug=1 to see what happened. */
 const store = require('../lib/store.js');
 const P = require('../data/products.js');
+const gemini = require('../lib/gemini.js');
 
-const BASE = 'https://generativelanguage.googleapis.com/v1beta';
 
 function compact(stats) {
   const c = stats.counts || {};
@@ -19,74 +19,6 @@ function compact(stats) {
     products_started: perProduct,
     notes: (stats.notes || []).slice(0, 30).map((n) => ({ product: (P.PRODUCTS[n.product] || {}).name || '', tags: n.tags, text: n.text }))
   };
-}
-
-/* Models this key can use for text generation, best candidates first: newest plain "flash", then "flash-lite". */
-async function discover(key) {
-  const r = await fetch(BASE + '/models?pageSize=200', { headers: { 'x-goog-api-key': key } });
-  if (!r.ok) throw new Error('model list ' + r.status);
-  const j = await r.json();
-  const rows = (j.models || []).filter((m) => (m.supportedGenerationMethods || []).indexOf('generateContent') >= 0)
-    .map((m) => String(m.name || '').replace(/^models\//, ''))
-    .filter((n) => /^gemini-/.test(n) && /flash/.test(n) && !/(image|tts|audio|live|embed|robot|computer|vision|exp)/.test(n));
-  const ver = (n) => { const m = n.match(/gemini-(\d+(?:\.\d+)?)/); return m ? parseFloat(m[1]) : 0; };
-  const score = (n) => ver(n) * 100 + (/lite/.test(n) ? 0 : 20) + (/preview|latest/.test(n) ? 0 : 10);
-  return rows.sort((a, b) => score(b) - score(a));
-}
-
-function parseJson(text) {
-  let t = String(text || '').trim().replace(/^```(?:json)?/i, '').replace(/```$/, '').trim();
-  const a = t.indexOf('{'), b = t.lastIndexOf('}');
-  if (a >= 0 && b > a) t = t.slice(a, b + 1);
-  return JSON.parse(t);
-}
-
-async function generate(key, model, prompt, useJsonMode) {
-  const cfg = { temperature: 0.3 }; if (useJsonMode) cfg.responseMimeType = 'application/json';
-  const r = await fetch(BASE + '/models/' + encodeURIComponent(model) + ':generateContent', {
-    method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
-    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: cfg })
-  });
-  if (!r.ok) { const body = await r.text().catch(() => ''); const e = new Error('HTTP ' + r.status + ' ' + body.replace(/\s+/g, ' ').slice(0, 160)); e.status = r.status; throw e; }
-  const j = await r.json();
-  const parts = j && j.candidates && j.candidates[0] && j.candidates[0].content && j.candidates[0].content.parts || [];
-  const text = parts.map((p) => p.text || '').join('');
-  if (!text) throw new Error('empty answer');
-  return parseJson(text);
-}
-
-const API = 'https://generativelanguage.googleapis.com/v1beta';
-
-async function generate(model, key, prompt) {
-  const r = await fetch(API + '/models/' + encodeURIComponent(model) + ':generateContent', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
-    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { responseMimeType: 'application/json', temperature: 0.3 } })
-  });
-  if (!r.ok) { const t = await r.text().catch(() => ''); const e = new Error('HTTP ' + r.status + ' ' + t.replace(/\s+/g, ' ').slice(0, 160)); e.status = r.status; throw e; }
-  const j = await r.json();
-  const parts = (j && j.candidates && j.candidates[0] && j.candidates[0].content && j.candidates[0].content.parts) || [];
-  const txt = parts.filter((p) => !p.thought && typeof p.text === 'string').map((p) => p.text).join('').trim();
-  if (!txt) throw new Error('empty answer');
-  return parseJson(txt);
-}
-function parseJson(t) {
-  t = t.replace(/^```(?:json)?/i, '').replace(/```$/, '').trim();
-  try { return JSON.parse(t); } catch (e) { const m = t.match(/\{[\s\S]*\}/); if (m) return JSON.parse(m[0]); throw e; }
-}
-
-/* Model names change over time. Ask Google which "flash" models this key can use, newest first. */
-async function discover(key) {
-  const r = await fetch(API + '/models?pageSize=200', { headers: { 'x-goog-api-key': key } });
-  if (!r.ok) throw new Error('list models HTTP ' + r.status);
-  const j = await r.json();
-  const ver = (n) => { const m = /gemini-(\d+(?:\.\d+)?)/.exec(n); return m ? parseFloat(m[1]) : 0; };
-  return (j.models || [])
-    .filter((m) => (m.supportedGenerationMethods || []).indexOf('generateContent') >= 0)
-    .map((m) => String(m.name || '').replace(/^models\//, ''))
-    .filter((n) => /flash/i.test(n) && !/(image|tts|live|audio|embed|robotics|computer|native|exp)/i.test(n))
-    .sort((a, b) => (ver(b) - ver(a)) || (/lite/i.test(a) - /lite/i.test(b)))
-    .slice(0, 3);
 }
 
 module.exports = async function handler(req, res) {
@@ -108,26 +40,13 @@ module.exports = async function handler(req, res) {
     'Write a short, honest readout for the brand team. Do not invent numbers that are not in the data. If the sample is small, say so. Do not give medical advice. ' +
     'Return JSON only with this shape: {"headline": string (max 18 words), "themes": [{"title": string, "detail": string (max 28 words)}] (2 to 4 items), "actions": [string] (2 to 3 concrete product or content actions, each max 20 words)}.\n\nDATA:\n' + JSON.stringify(compact(stats));
 
-  let remembered = '';
-  try { remembered = (await store.cacheGet('fc:aimodel')) || ''; } catch (e) { /* ignore */ }
-  const queue = [process.env.GEMINI_MODEL, remembered, 'gemini-2.5-flash'].filter((m, i, a) => m && a.indexOf(m) === i);
-  let out = null, used = '', authFail = false;
-  const attempt = async (model) => {
-    try { out = await generate(model, key, prompt); used = model; tried.push({ model, ok: true }); }
-    catch (e) { tried.push({ model, error: e.message }); if (e.status === 401 || e.status === 403) authFail = true; }
-  };
-  for (const m of queue) { if (out || authFail) break; await attempt(m); }
-  if (!out && !authFail) {
-    try {
-      const found = await discover(key); tried.push({ step: 'discover', models: found });
-      for (const m of found) { if (out || authFail) break; if (queue.indexOf(m) < 0) await attempt(m); }
-    } catch (e) { tried.push({ step: 'discover', error: e.message }); }
-  }
+  const g = await gemini.ask(prompt), out = g.out, used = g.used;
+  g.tried.forEach((t) => tried.push(t));
   if (!out) return finish({ source: 'rules', reason: 'Gemini did not return an answer. See "tried".' });
 
   const payload = { source: 'gemini', model: used, headline: String(out.headline || '').slice(0, 200),
     themes: (out.themes || []).slice(0, 4).map((t) => ({ title: String(t.title || '').slice(0, 80), detail: String(t.detail || '').slice(0, 260) })),
     actions: (out.actions || []).slice(0, 3).map((a) => String(a).slice(0, 200)) };
-  try { await store.cacheSet('fc:ai', JSON.stringify({ total, notes: (stats.notes || []).length, payload }), 600); await store.cacheSet('fc:aimodel', used, 86400); } catch (e) { /* ignore */ }
+  try { await store.cacheSet('fc:ai', JSON.stringify({ total, notes: (stats.notes || []).length, payload }), 600); } catch (e) { /* ignore */ }
   return finish(payload);
 };
