@@ -189,7 +189,56 @@
     }
   };
   Object.keys(HI).forEach(function (k) { PRODUCTS[k].hi = HI[k]; });
+
+  /* Quick look (shown on hover), from pack and public listing information only. */
+  var QUICK = {
+    sa1:   { who: 'Anyone dealing with body acne or rough, dull skin on the body.', fit: ['Pack: helps prevent body acne and exfoliates dead skin cells.', 'A 1% salicylic acid body wash, 250 ml.'], check: 'Patch test if your skin is sensitive.' },
+    aha5:  { who: 'People who want to exfoliate, de-tan and brighten body skin.', fit: ['Pack: exfoliates and hydrates; de-tans and brightens skin tone.', 'Lactic, glycolic and salicylic acids, 700 ml.'], check: 'Patch test first. Keep away from eyes.' },
+    roll:  { who: 'Anyone who wants to control underarm odour and pigmentation.', fit: ['Pack: controls body odour and reduces hyperpigmentation.', 'A 6% AHA BHA roll-on, 75 ml.'], check: 'Not for broken or irritated skin. Patch test.' },
+    gum:   { who: 'Anyone who wants daily support for hair strength and hair fall.', fit: ['Pack: biotin, multivitamins and zinc; no added sugar.', 'A nutraceutical, not a medicine. 1 gummy a day.'], check: 'Ask a healthcare professional if you are unsure.' },
+    serum: { who: 'People with hair fall or thinning hair who want a leave-in scalp serum.', fit: ['Pack: 3% Rosemary, 3% Redensyl, 2% Aminexil, 2% Anagain.', 'Listing: for hair fall, thinning hair and weak roots.'], check: 'External use only. Judge after 3 to 4 months.' },
+    spot:  { who: 'People with acne-prone skin who want a gel for spots.', fit: ['Listing: suits normal, combination and oily skin.', '2% salicylic acid with 1% glycolic acid and 4% niacinamide.'], check: 'A lower strength may suit dry or sensitive skin.' }
+  };
+  Object.keys(QUICK).forEach(function (k) { PRODUCTS[k].quick = QUICK[k]; });
+
+  /* Expectation Receipt: what customers can say they hope for (labels max 24 characters), per product. */
+  var EXPECT = {
+    sa1:   [['acne', 'Fewer body breakouts', 'Body pimples kam'], ['smooth', 'Smoother skin', 'Skin zyada smooth'], ['dead', 'Less dull, dead skin', 'Dull skin kam']],
+    aha5:  [['detan', 'De-tanning', 'De-tan hona'], ['bright', 'Brighter skin tone', 'Skin tone brighter'], ['smooth', 'Smoother skin', 'Skin zyada smooth'], ['hydrate', 'Hydrated skin', 'Skin hydrated']],
+    roll:  [['odour', 'Less underarm odour', 'Underarm odour kam'], ['pigment', 'Lighter pigmentation', 'Pigmentation halka']],
+    gum:   [['fall', 'Less hair fall', 'Hair fall kam'], ['strong', 'Stronger hair', 'Baal zyada strong']],
+    serum: [['fall', 'Less hair fall', 'Hair fall kam'], ['thick', 'Thicker-looking hair', 'Baal ghane dikhein'], ['roots', 'Stronger roots', 'Roots strong']],
+    spot:  [['pimples', 'Pimples settle down', 'Pimples theek hon'], ['redness', 'Less acne redness', 'Acne ki redness kam'], ['marks', 'Marks fade', 'Daag halke hon']]
+  };
+  Object.keys(EXPECT).forEach(function (k) {
+    PRODUCTS[k].expect = EXPECT[k].map(function (o) { return { id: o[0], en: o[1], hi: o[2] }; }).concat([{ id: 'other', en: 'Something else', hi: 'Kuch aur' }]);
+  });
+  /* When the pack or listing says results show: [earliest, latest] in weeks, or null when the pages do not say. */
+  var STATED = {
+    sa1:   { weeks: [12, 12], en: 'about 3 months', hi: 'lagbhag 3 mahine' },
+    aha5:  { weeks: [12, 12], en: 'about 3 months', hi: 'lagbhag 3 mahine' },
+    roll:  { weeks: null, en: '', hi: '' },
+    gum:   { weeks: null, en: '', hi: '' },
+    serum: { weeks: [12, 16], en: '3 to 4 months', hi: '3 se 4 mahine' },
+    spot:  { weeks: [1, 8], en: 'a week for pimples and about 2 months for marks', hi: 'pimples ke liye ek hafta aur daagon ke liye lagbhag 2 mahine' }
+  };
+  Object.keys(STATED).forEach(function (k) { PRODUCTS[k].stated = STATED[k]; });
+  /* "When do you expect to notice a change?" buckets. upper = the longest wait (in weeks) the person is willing to expect. */
+  var TIMES = [
+    { id: 'w2', en: 'Within 2 weeks', hi: '2 hafte ke andar', upper: 2 },
+    { id: 'w4', en: '2 to 4 weeks', hi: '2 se 4 hafte', upper: 4 },
+    { id: 'm3', en: '1 to 3 months', hi: '1 se 3 mahine', upper: 13 },
+    { id: 'm3p', en: 'More than 3 months', hi: '3 mahine se zyada', upper: 999 },
+    { id: 'unsure', en: 'Not sure', hi: 'Pata nahi', upper: null }
+  ];
+  /* Compare what the customer expects with what the pack or listing says. */
+  function timeGap(pid, tid) {
+    var st = PRODUCTS[pid] && PRODUCTS[pid].stated, t = TIMES.filter(function (x) { return x.id === tid; })[0];
+    if (!t || t.upper === null) return 'unsure';
+    if (!st || !st.weeks) return 'unknown';
+    return t.upper < st.weeks[0] ? 'longer' : 'aligned'; // "longer": they expect results sooner than the pages suggest
+  }
   var CATS = [['all', 'Shop all'], ['body', 'Body care'], ['hair', 'Hair care'], ['acne', 'Acne care']];
   var ORDER = ['sa1', 'aha5', 'roll', 'gum', 'serum', 'spot'];
-  return { PRODUCTS: PRODUCTS, ORDER: ORDER, CATS: CATS, NOT_STATED: NS };
+  return { PRODUCTS: PRODUCTS, ORDER: ORDER, CATS: CATS, TIMES: TIMES, timeGap: timeGap, NOT_STATED: NS };
 });
