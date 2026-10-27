@@ -50,15 +50,60 @@
     var n = ids.map(function (id) { return PRODUCTS[id].name; });
     return n.length > 1 ? n.slice(0, -1).join(', ') + ' and ' + n[n.length - 1] : n[0];
   }
-  function waLink(ids) {
-    var msg = 'Hi! I just ordered the ' + listNames(ids) + ' 🙂 Would love a FitCheck on how ' + (ids.length > 1 ? 'they work.' : 'it works.');
+  function waLink(ids, code) {
+    var msg = 'Hi! I just ordered the ' + listNames(ids) + ' 🙂 Would love a FitCheck on how ' + (ids.length > 1 ? 'they work.' : 'it works.') + (code ? ' (Order #' + code + ')' : '');
     return 'https://wa.me/' + CFG.whatsappNumber + '?text=' + encodeURIComponent(msg);
   }
 
+  /* ---------- Expectation Receipt: what the customer hopes for, remembered on this device ---------- */
+  var TIMES = P.TIMES;
+  function getExp() { try { return JSON.parse(localStorage.getItem('fc_exp') || '{}'); } catch (e) { return memo.exp || {}; } }
+  function setExp(x) { memo.exp = x; try { localStorage.setItem('fc_exp', JSON.stringify(x)); } catch (e) { /* private mode */ } }
+  function expFor(ids) { var all = getExp(), out = {}; ids.forEach(function (id) { if (all[id] && all[id].o && all[id].o.length) out[id] = all[id]; }); return out; }
+  function expWidget(id, compact) {
+    var p = PRODUCTS[id], e = getExp()[id] || { o: [], t: '' };
+    var gap = e.t ? P.timeGap(id, e.t) : '';
+    return '<div class="xw" data-xw="' + id + '"' + (compact ? ' data-compact="1"' : '') + '><div class="xh"><span class="ic">' + IC.target + '</span><b>Your expectation receipt</b><span class="tag">OPTIONAL</span></div>' +
+      '<p class="muted xs">' + (compact ? esc(p.nick) + ': ' : '') + 'What are you hoping this does for you? Pick up to 3. We remember it on this device and compare it with how things actually go.</p>' +
+      '<div class="chips" role="group" aria-label="What you hope for">' + p.expect.map(function (o) { var on = e.o.indexOf(o.id) >= 0; return '<button type="button" class="xc' + (on ? ' on' : '') + '" data-xo="' + id + ':' + o.id + '" aria-pressed="' + on + '">' + esc(o.en) + '</button>'; }).join('') + '</div>' +
+      '<p class="xl">When do you expect to notice a change?</p>' +
+      '<div class="chips" role="group" aria-label="When you expect a change">' + TIMES.map(function (t) { var on = e.t === t.id; return '<button type="button" class="xc' + (on ? ' on' : '') + '" data-xt="' + id + ':' + t.id + '" aria-pressed="' + on + '">' + esc(t.en) + '</button>'; }).join('') + '</div>' +
+      (gap === 'longer' && p.stated ? '<p class="xnote">Heads up: the pack and listing point to ' + esc(p.stated.en) + ', so it may take a little longer than you hope.</p>' : '') + '</div>';
+  }
+  function receiptCard(ids) {
+    var all = expFor(ids), keys = Object.keys(all);
+    if (!keys.length) return '';
+    return '<div class="rcpt" aria-label="Your expectation receipt"><div class="rh"><b>EXPECTATION RECEIPT</b><span>' + new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) + '</span></div>' +
+      keys.map(function (id) {
+        var p = PRODUCTS[id], e = all[id], gap = P.timeGap(id, e.t);
+        return '<div class="rl"><div class="rn">' + esc(p.name) + '</div><div class="rr"><span>Hoping for</span><span>' + e.o.map(function (o) { return esc(p.expect.filter(function (x) { return x.id === o; })[0].en); }).join(', ') + '</span></div>' +
+          '<div class="rr"><span>Expected in</span><span>' + esc((TIMES.filter(function (t) { return t.id === e.t; })[0] || TIMES[4]).en) + '</span></div>' +
+          '<div class="rr"><span>Pack says</span><span>' + esc(p.stated && p.stated.en ? p.stated.en : 'Not stated') + '</span></div>' +
+          (gap === 'longer' ? '<div class="rnote">It may take a little longer than you hope. That is normal.</div>' : '') + '</div>';
+      }).join('') + '<div class="rf">We will ask how it compared at your check-in. Your answers stay anonymous.</div></div>';
+  }
+  function postReceipt(ids) {
+    var all = expFor(ids);
+    if (!Object.keys(all).length) return Promise.resolve('');
+    var ctl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    var timer = setTimeout(function () { if (ctl) ctl.abort(); }, 3500);
+    return fetch('api/receipt', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ids: ids, p: all }), signal: ctl ? ctl.signal : undefined })
+      .then(function (r) { return r.json(); }).then(function (j) { clearTimeout(timer); return (j && j.code) || ''; }).catch(function () { clearTimeout(timer); return ''; });
+  }
+  function repaintX(id) {
+    document.querySelectorAll('[data-xw="' + id + '"]').forEach(function (w) { var c = w.dataset.compact; w.outerHTML = expWidget(id, !!c); });
+  }
+
   /* ---------- store ---------- */
+  function quickLook(p) {
+    return '<div class="quick" id="q-' + p.id + '" role="group" aria-label="Quick look at ' + esc(p.name) + '"><div class="qk">Who it is for</div><p>' + esc(p.quick.who) + '</p>' +
+      '<div class="qk">At a glance</div><ul>' + p.quick.fit.map(function (f) { return '<li>' + esc(f) + '</li>'; }).join('') + '</ul>' +
+      '<div class="qk">Check first</div><p>' + esc(p.quick.check) + '</p><a class="qm" href="#/p/' + p.id + '">Full guide →</a></div>';
+  }
   function productCard(id) {
     var p = PRODUCTS[id];
     return '<article class="pcard"><a class="ph" href="#/p/' + id + '" aria-label="' + esc(p.name) + '"><span class="badge">' + esc(p.tag) + '</span><img src="' + p.img + '" alt="' + esc(p.name) + ' pack" loading="lazy" width="520" height="520"></a>' +
+      '<button class="qbtn" type="button" data-q="' + id + '" aria-label="Quick look at ' + esc(p.name) + '" aria-expanded="false" aria-controls="q-' + id + '">i</button>' + quickLook(p) +
       '<div class="pb"><div class="kicker">' + esc(p.short) + '</div><h3><a href="#/p/' + id + '">' + esc(p.name) + '</a></h3>' +
       '<div class="pills"><span>' + esc(p.size) + '</span></div>' +
       '<div class="fcline">' + IC.chat + 'FitCheck check-in on day ' + p.checkinDays + '</div>' +
@@ -129,7 +174,7 @@
       '<p class="muted">' + esc(p.short) + ' · ' + esc(p.size) + '</p><div class="price">' + money(p.price) + '<small>demo price</small></div>' +
       '<div class="buy"><button class="btn" data-add="' + id + '" type="button">Add to cart</button><button class="btn ghost" data-buy="' + id + '" type="button">Buy now</button></div>' +
       '<div class="fcnote">' + IC.chat + '<span><b>FitCheck is included.</b> After you order, we send this guide on WhatsApp and check in around day ' + d + ', so you can judge it fairly and know your next step.</span></div></div></div>' +
-      guideCard(p) +
+      '<section class="card xsec">' + expWidget(id) + '</section>' + guideCard(p) +
       '<section class="card plan"><h3>Your trial plan with FitCheck</h3><div class="timeline">' +
       '<div class="st"><div class="dot">1</div><b>Order today</b><span>Read the guide above.</span></div>' +
       '<div class="st"><div class="dot">2</div><b>Start using it</b><span>Follow the steps, as directed.</span></div>' +
@@ -158,6 +203,7 @@
     if (!ids.length) return viewCart();
     var total = ids.reduce(function (n, id) { return n + PRODUCTS[id].price * c[id]; }, 0);
     return '<h1>Checkout</h1><div class="cart-grid"><div><div class="notice"><b>Demo checkout.</b> No name, address, phone number or payment details are collected. Nothing is charged and nothing is shipped.</div>' +
+      '<div class="card xsec"><h3 style="margin-top:0">Set your expectations</h3><p class="muted xs">Takes 10 seconds and makes your check-in more useful. Skip it if you like.</p>' + ids.map(function (id) { return expWidget(id, true); }).join('') + '</div>' +
       optin(memo.fc) +
       '<div class="card"><h3>What happens after you place the order</h3><ol style="padding-left:1.2em;margin:0"><li>You see your order confirmation.</li><li>If FitCheck is on, you tap <b>Continue on WhatsApp</b>. A message is ready for you to send.</li><li>FitCheck replies with a short guide, then checks in a little later (in real life, after a week or two).</li></ol></div></div>' +
       '<aside class="sum"><h3 style="margin-top:0">Your order</h3>' + ids.map(function (id) { return '<div class="r"><span>' + esc(PRODUCTS[id].name) + ' × ' + c[id] + '</span><span>' + money(PRODUCTS[id].price * c[id]) + '</span></div>'; }).join('') +
@@ -167,9 +213,9 @@
   function viewDone() {
     var o = memo.order;
     if (!o) return '<div class="empty"><h1>No order yet</h1><a class="btn" href="#/">Shop all</a></div>';
-    var link = waLink(o.ids), on = o.fc;
+    var link = waLink(o.ids, o.code), on = o.fc;
     return '<div class="done"><div class="tick"><svg viewBox="0 0 32 32"><path d="M9 16.5l4.5 4.5L23 11" stroke="#fff" stroke-width="3.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>' +
-      '<h1>Thank you! Demo order placed</h1><p class="muted">' + esc(listNames(o.ids)) + '</p>' +
+      '<h1>Thank you! Demo order placed</h1><p class="muted">' + esc(listNames(o.ids)) + '</p>' + receiptCard(o.ids) +
       '<div class="act"><span class="eyebrow"><span class="fcdot"></span>FitCheck</span><h2>' + (on ? 'Your FitCheck is ready to start' : 'Want a FitCheck anyway?') + '</h2>' +
       '<p class="muted" style="margin:0 0 6px">Get your guide and a friendly check-in on WhatsApp. It opens with a message ready to send.</p>' +
       '<div class="act-grid"><div><a class="btn wa" href="' + link + '" target="_blank" rel="noopener" id="waBtn">' + IC.wa + ' Continue on WhatsApp</a>' +
@@ -283,7 +329,7 @@
   function drawQr() {
     var el = $('#qr'); if (!el || !memo.order) return;
     function hideQr() { var w = $('#qrWrap'); if (w) w.style.display = 'none'; }
-    function draw() { try { new window.QRCode(el, { text: waLink(memo.order.ids), width: 150, height: 150, correctLevel: window.QRCode.CorrectLevel.M }); } catch (e) { hideQr(); } }
+    function draw() { try { new window.QRCode(el, { text: waLink(memo.order.ids, memo.order.code), width: 150, height: 150, correctLevel: window.QRCode.CorrectLevel.M }); } catch (e) { hideQr(); } }
     if (window.QRCode) return draw();
     var s = document.createElement('script'); s.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';
     s.onload = function () { if ($('#qr')) draw(); }; s.onerror = hideQr;
@@ -291,7 +337,7 @@
   }
   function bindChat(q) {
     var ids = (q.ids || 'aha5').split('.').filter(function (x) { return PRODUCTS[x]; }).slice(0, 3); if (!ids.length) ids = ['aha5'];
-    function start(list) { window.FitChat.mount($('#chatRoot'), list); }
+    function start(list) { window.FitChat.mount($('#chatRoot'), list, { receipt: expFor(list) }); }
     $('#startChat').onclick = function () {
       var sel = Array.prototype.map.call(document.querySelectorAll('#pickers input:checked'), function (i) { return i.value; }).slice(0, 3);
       start(sel.length ? sel : ['aha5']);
@@ -304,6 +350,18 @@
     if (e.target.closest('#themeBtn')) { toggleTheme(); return; }
     var sl = e.target.closest('[data-slide],[data-cprev],[data-cnext]');
     if (sl && startCarousel.go) { clearInterval(carTimer); startCarousel.go(sl.dataset.slide !== undefined ? parseInt(sl.dataset.slide, 10) : carIdx + (sl.hasAttribute('data-cnext') ? 1 : -1)); return; }
+    var xo = e.target.closest('[data-xo],[data-xt],[data-q]');
+    if (xo) {
+      if (xo.dataset.q) { var card = xo.closest('.pcard'), open = !card.classList.contains('open'); document.querySelectorAll('.pcard.open').forEach(function (c) { c.classList.remove('open'); var b = c.querySelector('.qbtn'); if (b) b.setAttribute('aria-expanded', 'false'); }); card.classList.toggle('open', open); xo.setAttribute('aria-expanded', String(open)); return; }
+      var pr = (xo.dataset.xo || xo.dataset.xt).split(':'), all = getExp(), cur = all[pr[0]] || { o: [], t: '' };
+      if (xo.dataset.xo) {
+        var i = cur.o.indexOf(pr[1]);
+        if (i >= 0) cur.o.splice(i, 1); else if (cur.o.length < 3) cur.o.push(pr[1]); else toast('Pick up to 3');
+      } else cur.t = cur.t === pr[1] ? '' : pr[1];
+      all[pr[0]] = cur; setExp(all); repaintX(pr[0]);
+      var nb = document.querySelector('[data-' + (xo.dataset.xo ? 'xo' : 'xt') + '="' + (xo.dataset.xo || xo.dataset.xt) + '"]'); if (nb) nb.focus();
+      return;
+    }
     var t = e.target.closest('[data-add],[data-buy],[data-rm],[data-inc],[data-dec],#place'); if (!t) return;
     var c;
     if (t.dataset.add) { add(t.dataset.add); }
@@ -311,7 +369,10 @@
     else if (t.dataset.rm) { c = getCart(); delete c[t.dataset.rm]; setCart(c); route(); }
     else if (t.dataset.inc) { c = getCart(); c[t.dataset.inc] = Math.min(9, (c[t.dataset.inc] || 0) + 1); setCart(c); route(); }
     else if (t.dataset.dec) { c = getCart(); c[t.dataset.dec] = (c[t.dataset.dec] || 1) - 1; if (c[t.dataset.dec] <= 0) delete c[t.dataset.dec]; setCart(c); route(); }
-    else if (t.id === 'place') { memo.order = { ids: cartIds().slice(0, 3), fc: memo.fc }; setCart({}); location.hash = '#/done'; }
+    else if (t.id === 'place') {
+      var oids = cartIds().slice(0, 3); t.disabled = true; t.textContent = 'Placing order…';
+      postReceipt(oids).then(function (code) { memo.order = { ids: oids, fc: memo.fc, code: code }; setCart({}); location.hash = '#/done'; });
+    }
   });
   document.addEventListener('change', function (e) {
     if (e.target && e.target.id === 'fcOpt') { memo.fc = e.target.checked; var fp = $('#fcPrice'); if (fp) fp.textContent = memo.fc ? 'Included' : 'Not added'; }

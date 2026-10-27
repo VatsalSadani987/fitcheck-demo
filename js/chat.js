@@ -6,7 +6,7 @@
   var esc = function (s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
   var fmt = function (s) { return esc(s).replace(/\*([^*\n]+)\*/g, '<b>$1</b>').replace(/(^|[\s(])_([^_\n]+)_(?=[\s).,!?]|$)/g, '$1<i>$2</i>'); };
 
-  function mount(root, ids) {
+  function mount(root, ids, opts) {
     var token = {};
     root.__token = token;
     var state = null, skip = false, busy = false;
@@ -79,7 +79,7 @@
 
     (async function init() {
       bubble('sys', 'Browser preview. The WhatsApp version runs the same conversation.');
-      var r = E.startSession(ids, { siteUrl: location.origin });
+      var r = E.startSession(ids, { siteUrl: location.origin, receipt: opts && opts.receipt });
       state = r.state; report(r.events);
       await play(r.out);
     })();

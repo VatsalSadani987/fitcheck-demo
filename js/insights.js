@@ -41,6 +41,26 @@
     c['use:asdir'] = Math.round(low * .5); c['use:less'] = Math.round(low * .3); c['use:unsure'] = low - c['use:asdir'] - c['use:less'];
     var vt = 0; Object.keys(L.verdict).forEach(function (k) { vt += c['verdict:' + k] || 0; });
     c.shared = Math.round(vt * .46); c.notes = 4; c.done = Math.round(vt * .8);
+    /* Expectation receipts (invented). One product per decision, so every outcome shows. */
+    var X = {
+      aha5: { n: 30, hope: [3, 8, 15], gap: { longer: 22, aligned: 5, unknown: 0, unsure: 3 }, lessLonger: 11, t: { w2: 18, w4: 8, m3: 2, unsure: 2 }, o: [20, 14, 12, 6], m: [9, 4, 2] },
+      serum: { n: 14, hope: [2, 4, 6], gap: { longer: 3, aligned: 9, unknown: 0, unsure: 2 }, lessLonger: 1, t: { w2: 3, w4: 6, m3: 4, unsure: 1 }, o: [9, 7, 5, 2], m: [3, 2, 1], pr: { instr: 6, feel: 3, results: 3 } },
+      roll: { n: 15, hope: [2, 5, 6], gap: { longer: 0, aligned: 0, unknown: 13, unsure: 2 }, lessLonger: 0, t: { w2: 9, w4: 4, m3: 0, unsure: 2 }, o: [11, 8, 5, 2], m: [4, 2, 0], pr: { feel: 4, results: 2, smell: 1 } },
+      sa1: { n: 16, hope: [5, 6, 3], gap: { longer: 2, aligned: 12, unknown: 0, unsure: 2 }, lessLonger: 1, t: { w2: 5, w4: 7, m3: 3, unsure: 1 }, o: [12, 9, 6, 2], m: [2, 1, 0] },
+      gum: { n: 12, hope: [1, 6, 4], gap: { longer: 3, aligned: 7, unknown: 0, unsure: 2 }, lessLonger: 1, t: { w2: 2, w4: 4, m3: 5, unsure: 1 }, o: [8, 6, 4, 1], m: [2, 1, 1] },
+      spot: { n: 6, hope: [1, 1, 1], gap: { longer: 0, aligned: 5, unknown: 0, unsure: 1 }, lessLonger: 0, t: { w2: 4, w4: 1, m3: 0, unsure: 1 }, o: [4, 3, 2, 1], m: [1, 0, 0] }
+    };
+    ORDER.forEach(function (id) {
+      var x = X[id], ex = PRODUCTS[id].expect;
+      c['x:n:' + id] = x.n;
+      x.o.forEach(function (v, i) { if (v && ex[i]) c['x:o:' + id + ':' + ex[i].id] = v; });
+      x.m.forEach(function (v, i) { if (v && ex[i]) c['x:m:' + id + ':' + ex[i].id] = v; });
+      Object.keys(x.t).forEach(function (t) { if (x.t[t]) c['x:t:' + id + ':' + t] = x.t[t]; });
+      Object.keys(x.gap).forEach(function (g) { if (x.gap[g]) c['x:g:' + id + ':' + g] = x.gap[g]; });
+      ['better', 'as', 'less'].forEach(function (h, i) { c['x:h:' + id + ':' + h] = x.hope[i]; });
+      if (x.lessLonger) c['x:xt:' + id + ':longer:less'] = x.lessLonger;
+      if (x.pr) Object.keys(x.pr).forEach(function (r) { c['preason:' + id + ':' + r] = x.pr[r]; });
+    });
     return {
       counts: c, updated: 0, persistent: true,
       feed: [],
@@ -151,7 +171,54 @@
     var summ = ruleSummary(c);
     var ai = '<div class="ai" id="aiBox"><span class="tag">' + (sample ? 'What the team would learn' : 'Summary') + '</span><ul>' + summ.map(function (s) { return '<li>' + s + '</li>'; }).join('') + '</ul></div>';
     var notes = '<div class="card" style="margin-top:16px"><h3>Anonymous notes</h3>' + (d.notes && d.notes.length ? d.notes.slice(0, 12).map(function (n) { return '<div class="note">' + esc(n.text) + '<br><small>' + esc((PRODUCTS[n.product] || { name: '' }).name) + (n.tags && n.tags.length ? ' · ' + esc(n.tags.join(', ')) : '') + (n.t ? ' · ' + ago(n.t) : '') + '</small></div>'; }).join('') : '<p class="muted" style="margin:0">No notes yet. Notes appear when a customer chooses to tell the brand and adds a line.</p>') + '</div>';
-    return warn + kpis + charts + ai + notes + tableView(c) + tools(!sample);
+    return warn + kpis + charts + ai + expSection(c, sample) + notes + tableView(c) + tools(!sample);
+  }
+
+  /* ---------- Expectation vs experience ---------- */
+  function expSection(c, sample) {
+    var V = window.FitVariance, a = V.analyse(c);
+    var head = '<div class="sec-h" style="margin-top:28px"><h2 style="margin:0">Expectation vs experience</h2></div>' +
+      '<p class="muted" style="max-width:52em;margin:6px 0 14px">Before buying, customers said what they hoped for and by when. At the check-in they said how it compared. The decision on each card comes from fixed rules; Gemini only explains it in words.</p>';
+    if (!a.products.length) return head + '<div class="card"><p class="muted" style="margin:0">No expectation receipts yet. On the store, pick what you hope for on a product page or at checkout, order, then run the check-in.</p></div>';
+    var kp = '<div class="kpis" style="margin-bottom:14px"><div class="kpi"><b>' + a.receipts + '</b><span>expectation receipts</span></div>' +
+      '<div class="kpi"><b>' + a.answered + '</b><span>compared with what they hoped</span></div>' +
+      '<div class="kpi"><b>' + Math.round(100 * a.lessShare) + '%</b><span>said it fell short of their hope</span></div></div>';
+    var ai = sample ? '' : '<div class="xai" id="xaiBox"><h4>Gemini readout</h4><p class="muted" style="margin:0;font-size:.86rem">Loading…</p></div>';
+    var cards = a.products.map(function (r) {
+      var p = PRODUCTS[r.id], t = r.answered || 1, h = r.hope;
+      var seg = function (n, col, lab) { return n ? '<i style="width:' + (100 * n / t) + '%;background:' + col + '" title="' + lab + ': ' + n + '"></i>' : ''; };
+      var topT = r.topTime ? (P.TIMES.filter(function (x) { return x.id === r.topTime.id; })[0] || {}).en : '–';
+      var sooner = r.receipts ? Math.round(100 * (r.gap.longer || 0) / r.receipts) : 0;
+      return '<div class="xcard" data-xid="' + r.id + '"><h4><span>' + esc(p.name) + '</span><span class="dpill ' + r.tone + '">' + esc(r.title) + '</span></h4>' +
+        '<div class="sub">' + r.receipts + ' receipts · ' + r.answered + ' answered the check-in</div>' +
+        (r.answered ? '<div class="xbar" role="img" aria-label="' + h.better + ' better, ' + h.as + ' as hoped, ' + h.less + ' less than hoped">' + seg(h.better, 'var(--s3)', 'Better') + seg(h.as, 'var(--s1)', 'As hoped') + seg(h.less, 'var(--s2)', 'Less') + '</div>' +
+          '<ul class="xleg"><li><span class="sw" style="background:var(--s3)"></span>Better ' + h.better + '</li><li><span class="sw" style="background:var(--s1)"></span>As hoped ' + h.as + '</li><li><span class="sw" style="background:var(--s2)"></span>Less than hoped ' + h.less + '</li></ul>' : '') +
+        '<div class="xkv"><span>Hoped for most</span><span>' + (r.topOut ? esc(V.label(r.id, r.topOut.id)) : '–') + '</span>' +
+        '<span>Expected change in</span><span>' + esc(topT) + '</span>' +
+        '<span>Pack says</span><span>' + esc(p.stated && p.stated.en ? p.stated.en : 'Not stated') + '</span>' +
+        '<span>Hoped sooner than pack</span><span>' + sooner + '% of receipts</span>' +
+        '<span>Fell shortest</span><span>' + (r.missed ? esc(V.label(r.id, r.missed.id)) : '–') + '</span></div>' +
+        '<div class="xwhy" style="font-size:.86rem">' + esc(r.why) + '</div>' +
+        '<div class="xaction"><b>Team:</b> ' + esc(r.action) + '</div><div class="xexp muted" style="font-size:.84rem"></div></div>';
+    }).join('');
+    return head + kp + ai + '<div class="xgrid">' + cards + '</div>';
+  }
+  var lastXAi = null, xTry = 0;
+  function renderXAi(s) {
+    var box = $('#xaiBox'); if (!box || !s) return;
+    if (s.source === 'gemini') {
+      box.innerHTML = '<h4>Gemini readout</h4><p style="font-weight:700;margin:0 0 4px">' + esc(s.headline) + '</p><p class="muted" style="font-size:.78rem;margin:0">Explains the rule-based decisions below. It does not change them. Check against the numbers before acting.</p>';
+      (s.products || []).forEach(function (x) {
+        var card = document.querySelector('[data-xid="' + x.id + '"] .xexp');
+        if (card) card.innerHTML = '<b>Gemini:</b> ' + esc(x.explain) + (x.team_should ? ' <b>Next:</b> ' + esc(x.team_should) : '');
+      });
+    } else {
+      box.innerHTML = '<h4>Gemini readout</h4><p class="muted" style="margin:0;font-size:.86rem">Not available' + (s.reason ? ' (' + esc(s.reason) + ')' : '') + '. The rule-based decisions below still apply.</p>';
+    }
+  }
+  function loadXAi() {
+    xTry = Date.now();
+    fetch('api/expectation').then(function (r) { return r.ok ? r.json() : null; }).then(function (s) { if (s) { lastXAi = s; renderXAi(s); } }).catch(function () { /* keep rule-based cards */ });
   }
 
   function feedHtml(feed, sample) {
@@ -180,12 +247,16 @@
     });
     ORDER.forEach(function (id) { rows.push(['product_checkins_started', PRODUCTS[id].name, c['pstart:' + id] || 0]); });
     rows.push(['totals', 'sessions', c.sessions || 0], ['totals', 'told_the_brand', c.shared || 0]);
+    if (window.FitVariance) window.FitVariance.analyse(c).products.forEach(function (r) {
+      var nm = PRODUCTS[r.id].name;
+      rows.push(['expectation_receipts', nm, r.receipts], ['expectation_better_than_hoped', nm, r.hope.better], ['expectation_as_hoped', nm, r.hope.as], ['expectation_less_than_hoped', nm, r.hope.less], ['expectation_decision', nm + ': ' + r.title, r.answered]);
+    });
     rows.push([], ['notes_product', 'notes_tags', 'notes_text']);
     (d.notes || []).forEach(function (n) { rows.push([(PRODUCTS[n.product] || {}).name || '', (n.tags || []).join('; '), n.text]); });
     return rows.map(function (r) { return r.map(function (v) { v = String(v == null ? '' : v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }).join(','); }).join('\n');
   }
 
-  var lastJson = '', lastAi = null, aiTry = 0;
+  var lastJson = '', lastAi = null, aiTry = 0, lastXTotal = -1;
 
   function renderAi(s) {
     var box = $('#aiBox'); if (!box || !s) return;
@@ -221,6 +292,7 @@
       };
       if (!sample && (d.counts || {}).sessions) {
         if (lastAi) renderAi(lastAi);
+        if ($('#xaiBox')) { if (lastXAi) renderXAi(lastXAi); var xs = Object.keys(c).reduce(function (n, k) { return n + (k.indexOf('x:h:') === 0 ? c[k] : 0); }, 0); if (xs !== lastXTotal || (!lastXAi || lastXAi.source !== 'gemini') && Date.now() - xTry > 60000) { lastXTotal = xs; loadXAi(); } }
         var failed = !lastAi || lastAi.source !== 'gemini';
         if (d.counts.sessions !== lastTotal || (failed && Date.now() - aiTry > 60000)) { lastTotal = d.counts.sessions; loadAi(); }
       }
