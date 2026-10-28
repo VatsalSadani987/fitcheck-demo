@@ -1,0 +1,40 @@
+{
+  "version": "6.2",
+  "screens": [
+    {
+      "id": "REASONS",
+      "title": "Quick check",
+      "terminal": true,
+      "success": true,
+      "data": {
+        "options": {
+          "type": "array",
+          "items": { "type": "object", "properties": { "id": { "type": "string" }, "title": { "type": "string" } } },
+          "__example__": [
+            { "id": "results", "title": "No visible results" },
+            { "id": "feel", "title": "Feel or texture" },
+            { "id": "smell", "title": "Smell" }
+          ]
+        }
+      },
+      "layout": {
+        "type": "SingleColumnLayout",
+        "children": [
+          {
+            "type": "CheckboxGroup",
+            "name": "reasons",
+            "label": "Tick all that apply",
+            "required": true,
+            "max-selected-items": 3,
+            "data-source": "${data.options}"
+          },
+          {
+            "type": "Footer",
+            "label": "Done",
+            "on-click-action": { "name": "complete", "payload": { "reasons": "${form.reasons}" } }
+          }
+        ]
+      }
+    }
+  ]
+}
