@@ -41,12 +41,26 @@ function findReply(node, depth) {
   return null;
 }
 
+/* A finished WhatsApp Flow arrives as nfm_reply with a JSON string, e.g. {"reasons":["results","feel"]}. */
+function findFlow(node, depth) {
+  if (!node || typeof node !== 'object' || (depth || 0) > 6) return null;
+  if (node.nfm_reply && node.nfm_reply.response_json) { try { return JSON.parse(node.nfm_reply.response_json); } catch (e) { return null; } }
+  if (node.flow_response && typeof node.flow_response === 'object') return node.flow_response;
+  for (const k of Object.keys(node)) { const r = findFlow(node[k], (depth || 0) + 1); if (r) return r; }
+  return null;
+}
+
 function extract(evt) {
   const m = evt.message || {};
   if (String(m.direction || 'inbound') !== 'inbound') return null;
   const phone = m.phone_number || (evt.conversation && evt.conversation.phone_number) || '';
   if (!phone) return null;
   let id = null, text = '';
+  const flow = findFlow(evt);
+  if (flow && flow.reasons) { // the Flow's tick-boxes: pass them on as "results, feel"
+    const list = Array.isArray(flow.reasons) ? flow.reasons : String(flow.reasons).split(/[,\s]+/);
+    return { phone, id: null, text: list.filter(Boolean).slice(0, 3).join(', '), msgId: m.whatsapp_message_id || m.id };
+  }
   const reply = findReply(m);
   if (reply) { id = reply.id || null; text = reply.title || ''; }
   const data = m.message_type_data || {};
@@ -79,7 +93,7 @@ module.exports = async function handler(req, res) {
   if (!verify(raw, req.headers['x-webhook-signature'])) return res.status(401).send('Invalid signature');
   let body;
   try { body = JSON.parse(raw.toString('utf8')); } catch (e) { return res.status(400).send('Bad JSON'); }
-  const cfg = { siteUrl: process.env.SITE_URL || (req.headers.host ? 'https://' + req.headers.host : '') };
+  const cfg = { siteUrl: process.env.SITE_URL || (req.headers.host ? 'https://' + req.headers.host : ''), flowId: process.env.KAPSO_FLOW_ID || '' };
   const events = Array.isArray(body) ? body : (Array.isArray(body.data) ? body.data : [body]);
   const work = Promise.all(events.map((e) => handle(e, cfg).catch((err) => console.error('handle error:', err.message))));
   res.status(200).send('OK'); // answer within 5 seconds, then keep working in the background
