@@ -156,7 +156,7 @@
   var timer = null, lastTotal = -1, lastData = null;
 
   function view() {
-    return '<span class="eyebrow"><span class="fcdot"></span>FitCheck Insights</span><h1 style="margin-top:8px">What the Be.Bodywise team would see</h1>' +
+    return '<span class="eyebrow"><span class="fcdot"></span>FitCheck Insights</span><h1 style="margin-top:8px">What the Be.Bodywise team would see</h1><span class="muted" style="font-size:.72rem">build 5d</span>' +
       '<p class="muted" style="max-width:48em">Anonymous answers only: no names, no phone numbers. Every WhatsApp or browser check-in updates the Live tab in seconds.</p>' +
       '<div class="ins-bar"><div class="seg" role="tablist"><button class="on" data-seg="live" role="tab" type="button">Live demo sessions</button><button data-seg="sample" role="tab" type="button">Sample data</button></div><span id="segTag"></span><span class="muted" id="stamp" style="font-size:.82rem"></span></div>' +
       '<div id="insBody"></div>';
@@ -315,10 +315,16 @@
       };
       if (sample) renderXAi(SAMPLE_X);
       if (!sample && (d.counts || {}).sessions) {
-        if (lastAi) renderAi(lastAi);
-        if ($('#xaiBox')) { if (lastXAi) renderXAi(lastXAi); var cc = d.counts, xs = Object.keys(cc).reduce(function (n, k) { return n + (k.indexOf('x:h:') === 0 ? cc[k] : 0); }, 0); if (xs !== lastXTotal || (!lastXAi || lastXAi.source !== 'gemini') && Date.now() - xTry > 60000) { lastXTotal = xs; loadXAi(); } }
-        var failed = !lastAi || lastAi.source !== 'gemini';
-        if (d.counts.sessions !== lastTotal || (failed && Date.now() - aiTry > 60000)) { lastTotal = d.counts.sessions; loadAi(); }
+        try { if (lastAi) renderAi(lastAi); } catch (e) { console.error('renderAi', e); }
+        try {
+          if ($('#xaiBox') && lastXAi) renderXAi(lastXAi);
+          var cc = d.counts, xs = 0; Object.keys(cc).forEach(function (k) { if (k.indexOf('x:h:') === 0) xs += cc[k]; });
+          if ($('#xaiBox') && (xs !== lastXTotal || ((!lastXAi || lastXAi.source !== 'gemini') && Date.now() - xTry > 60000))) { lastXTotal = xs; loadXAi(); }
+        } catch (e) { console.error('expectation AI', e); }
+        try {
+          var failed = !lastAi || lastAi.source !== 'gemini';
+          if (d.counts.sessions !== lastTotal || (failed && Date.now() - aiTry > 60000)) { lastTotal = d.counts.sessions; loadAi(); }
+        } catch (e) { console.error('summary AI', e); }
       }
     }
     function poll() {
