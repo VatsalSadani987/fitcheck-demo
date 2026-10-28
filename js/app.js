@@ -96,14 +96,14 @@
 
   /* ---------- store ---------- */
   function quickLook(p) {
-    return '<div class="quick" id="q-' + p.id + '" role="group" aria-label="Quick look at ' + esc(p.name) + '"><div class="qk">Who it is for</div><p>' + esc(p.quick.who) + '</p>' +
+    return '<div class="quick" id="q-' + p.id + '" role="group" aria-label="Product fit for ' + esc(p.name) + '"><div class="qt">Product fit</div><div class="qk">Who it is for</div><p>' + esc(p.quick.who) + '</p>' +
       '<div class="qk">At a glance</div><ul>' + p.quick.fit.map(function (f) { return '<li>' + esc(f) + '</li>'; }).join('') + '</ul>' +
       '<div class="qk">Check first</div><p>' + esc(p.quick.check) + '</p><a class="qm" href="#/p/' + p.id + '">Full guide →</a></div>';
   }
   function productCard(id) {
     var p = PRODUCTS[id];
-    return '<article class="pcard"><a class="ph" href="#/p/' + id + '" aria-label="' + esc(p.name) + '"><span class="badge">' + esc(p.tag) + '</span><img src="' + p.img + '" alt="' + esc(p.name) + ' pack" loading="lazy" width="520" height="520"></a>' +
-      '<button class="qbtn" type="button" data-q="' + id + '" aria-label="Quick look at ' + esc(p.name) + '" aria-expanded="false" aria-controls="q-' + id + '">i</button>' + quickLook(p) +
+    return '<article class="pcard"><div class="phw"><a class="ph" href="#/p/' + id + '" aria-label="' + esc(p.name) + '"><span class="badge">' + esc(p.tag) + '</span><img src="' + p.img + '" alt="' + esc(p.name) + ' pack" loading="lazy" width="520" height="520"></a>' +
+      '<button class="qbtn" type="button" data-q="' + id + '" aria-label="Product fit for ' + esc(p.name) + '" aria-expanded="false" aria-controls="q-' + id + '">i</button>' + quickLook(p) + '</div>' +
       '<div class="pb"><div class="kicker">' + esc(p.short) + '</div><h3><a href="#/p/' + id + '">' + esc(p.name) + '</a></h3>' +
       '<div class="pills"><span>' + esc(p.size) + '</span></div>' +
       '<div class="fcline">' + IC.chat + 'FitCheck check-in on day ' + p.checkinDays + '</div>' +
@@ -160,7 +160,7 @@
       '<div class="gb"><div class="gt"><span class="ic">' + IC.steps + '</span><h3>How to use it</h3></div><ol>' + p.how.map(function (x) { return '<li><span>' + esc(x) + '</span></li>'; }).join('') + '</ol></div>' +
       '<div class="gb"><div class="gt"><span class="ic">' + IC.clock + '</span><h3>How long to give it</h3></div><div class="when">' +
       '<div class="w brand"><small>Before you judge</small>' + judgeBrand + '</div>' +
-      '<div class="w fc"><small>FitCheck suggestion</small>A first check-in at about day ' + p.checkinDays + '. In this demo it arrives after 30 seconds.</div></div></div>' +
+      '</div></div>' +
       '<div class="gb warn"><div class="gt"><span class="ic">' + IC.alert + '</span><h3>Good to know</h3></div><ul>' + p.good.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul></div>' +
       '</div><div class="guide-f">Compiled from the pack photo and public listing pages. Where a page did not say, it says so and asks you to check your pack. If your pack differs, follow your pack. This is general information, not medical advice.</div></section>';
   }
@@ -173,13 +173,8 @@
       '<div class="info"><span class="chip">' + esc(p.tag) + '</span><h1 style="margin-top:10px;font-size:clamp(1.6rem,3.4vw,2.2rem)">' + esc(p.name) + '</h1>' +
       '<p class="muted">' + esc(p.short) + ' · ' + esc(p.size) + '</p><div class="price">' + money(p.price) + '<small>demo price</small></div>' +
       '<div class="buy"><button class="btn" data-add="' + id + '" type="button">Add to cart</button><button class="btn ghost" data-buy="' + id + '" type="button">Buy now</button></div>' +
-      '<div class="fcnote">' + IC.chat + '<span><b>FitCheck is included.</b> After you order, we send this guide on WhatsApp and check in around day ' + d + ', so you can judge it fairly and know your next step.</span></div></div></div>' +
-      '<section class="card xsec">' + expWidget(id) + '</section>' + guideCard(p) +
-      '<section class="card plan"><h3>Your trial plan with FitCheck</h3><div class="timeline">' +
-      '<div class="st"><div class="dot">1</div><b>Order today</b><span>Read the guide above.</span></div>' +
-      '<div class="st"><div class="dot">2</div><b>Start using it</b><span>Follow the steps, as directed.</span></div>' +
-      '<div class="st"><div class="dot">3</div><b>Day ' + d + ': check-in</b><span>A short WhatsApp message asks how it is going.</span></div>' +
-      '<div class="st"><div class="dot">4</div><b>Your next step</b><span>Keep going, wait, adjust, swap or see a doctor.</span></div></div></section>';
+      '</div></div>' +
+      '<section class="card xsec">' + expWidget(id) + '</section>' + guideCard(p);
   }
 
   function optin(checked) {
@@ -219,7 +214,7 @@
       '<div class="act"><span class="eyebrow"><span class="fcdot"></span>FitCheck</span><h2>' + (on ? 'Your FitCheck is ready to start' : 'Want a FitCheck anyway?') + '</h2>' +
       '<p class="muted" style="margin:0 0 6px">Get your guide and a friendly check-in on WhatsApp. It opens with a message ready to send.</p>' +
       '<div class="act-grid"><div><a class="btn wa" href="' + link + '" target="_blank" rel="noopener" id="waBtn">' + IC.wa + ' Continue on WhatsApp</a>' +
-      '<ol><li>Press send on the ready message.</li><li>FitCheck replies with your guide.</li><li>About 30 seconds later it checks in (in real life, after a week or two).</li></ol>' +
+      '<ol><li>Press send on the ready message.</li><li>FitCheck replies with your guide.</li><li>A few seconds later it checks in (in real life, after a week or two).</li></ol>' +
       '<p style="margin:0">Prefer not to use WhatsApp? <a href="#/chat?ids=' + o.ids.join('.') + '">Try the same check-in here in your browser</a>.</p></div>' +
       '<div id="qrWrap"><p class="muted" style="font-size:.84rem;margin:0">On a computer? Scan with your phone camera:</p><div class="qrbox"><div id="qr" aria-label="QR code to open WhatsApp"></div></div></div></div>' +
       '<p class="muted" style="font-size:.8rem;margin:14px 0 0">This site never asks for your number or stores it. WhatsApp shares your number with the FitCheck line only so it can reply. Messages come from ' + esc(CFG.whatsappDisplay) + '.</p></div></div>';
@@ -227,25 +222,15 @@
 
   /* ---------- FitCheck page ---------- */
   function viewFitCheck() {
-    var verdicts = [
-      ['Keep going', 'It is working well', 'Keep using it as directed and let it do its thing.'],
-      ['Wait longer', 'Used as directed, no change yet', 'Time is the next step. Shows how long the pack or listing says to give it.'],
-      ['Adjust usage', 'Used less than directed, unsure, or directions unclear', 'Repeats the steps from the pack and listing.'],
-      ['Consider a swap', 'Feel or smell is not for them', 'Suggests a product in the same range, with a patch-test reminder.'],
-      ['Value is their call', 'Price or value is the issue', 'Says plainly that nothing needs fixing, and shows an option.'],
-      ['See a doctor', 'Skin irritation', 'Stop using it. See a doctor or pharmacist if it does not settle. Never diagnoses.']
-    ];
     return '<section class="fc-hero"><div><span class="eyebrow" style="color:#C6F6EA"><span class="fcdot" style="background:#C6F6EA"></span>New at Be.Bodywise</span><h1 style="margin-top:10px">FitCheck: a fair first trial for everything you buy</h1>' +
       '<p>A short guide when you order, a friendly check-in on WhatsApp when you have had time to try it, and an honest next step. No guessing, no quietly giving up.</p>' +
       '<div class="actions"><a class="btn light" href="' + waLink(['aha5']) + '" target="_blank" rel="noopener">' + IC.wa.replace('stroke="#fff"', 'stroke="#0A6E5C"') + ' Try it on WhatsApp</a><a class="btn ghost" href="#/chat?ids=aha5">Try it in your browser</a></div></div>' +
       '<div><div class="mini-phone" style="transform:none"><div class="in"><div class="bb">Hey! 👋 Welcome to <b>FitCheck</b>, your buddy for getting the most out of your Be.Bodywise order.</div><div class="bb">🧴 <b>5% AHA BHA Exfoliating Body Wash</b><br><br><b>How to use</b><br>1. On wet skin, take some wash in your palms<br>2. Massage gently<br>3. Rinse</div><div class="bb">Hey! It’s been about two weeks 🙂 How’s it treating you so far?</div><div class="bb o">😕 Not what I expected</div></div></div></div></section>' +
-      '<h2 style="margin-top:34px">Where FitCheck fits in the Be.Bodywise journey</h2>' +
-      '<div class="journey"><div class="j"><b>Browse</b>Product pages</div><div class="j fc"><b>FitCheck</b>Guide on every product page</div><div class="j"><b>Checkout</b>Cart and payment</div><div class="j fc"><b>FitCheck</b>One tick to switch it on</div><div class="j"><b>Delivery</b>Order arrives</div><div class="j fc"><b>FitCheck</b>Check-in on day 7, 14 or 28</div><div class="j fc"><b>FitCheck</b>Honest verdict, anonymous note</div><div class="j"><b>Brand team</b>Insights dashboard</div></div>' +
-      '<div class="cols" style="margin:22px 0"><div class="card"><h3>1. Know before you start</h3><p class="muted" style="margin:0">Each product page carries what it is for, how to use it, how long to give it before judging and what to watch for. Taken from the pack and public pages only. If a page does not say, FitCheck says so.</p></div>' +
-      '<div class="card"><h3>2. A check-in at the right time</h3><p class="muted" style="margin:0">A short, friendly WhatsApp message around the day the product should start to show. Tap an answer, or type it. In this demo it arrives after 30 seconds instead of two weeks.</p></div>' +
-      '<div class="card"><h3>3. An honest next step</h3><p class="muted" style="margin:0">Fixed rules decide the verdict, not a chatbot guessing. Customers can add more than one reason and, if they like, tell the brand anonymously.</p></div></div>' +
-      '<h2>The six verdicts</h2><div class="tablewrap"><table class="t"><tr><th>Verdict</th><th>When</th><th>What FitCheck says</th></tr>' + verdicts.map(function (v) { return '<tr><td><b>' + v[0] + '</b></td><td>' + v[1] + '</td><td>' + v[2] + '</td></tr>'; }).join('') + '</table></div>' +
-      '<div class="card" style="margin-top:22px;display:flex;gap:18px;align-items:center;flex-wrap:wrap;justify-content:space-between"><div><h3 style="margin:0 0 4px">What the brand gets</h3><p class="muted" style="margin:0;max-width:40em">Why products disappoint, which products need clearer directions, and what is working, as live anonymous charts.</p></div><a class="btn fc" href="#/insights">See the Insights dashboard</a></div>' + aboutBlock();
+      '<h2 style="margin-top:34px">Why it exists, and where it fits</h2>' +
+      '<div class="card"><p style="margin:0 0 14px">When a product disappoints, nothing prompts customers to say so. They quietly drop it or switch, and the brand never learns why. Seven real customer conversations pointed this way. That is thin evidence, so treat FitCheck as an idea worth testing, not a proven fix.</p>' +
+      '<div class="journey"><div class="j"><b>Product page</b>Guide and expectations</div><div class="j"><b>Checkout</b>One tick turns it on</div><div class="j"><b>Delivery</b>Order arrives</div><div class="j fc"><b>FitCheck</b>Check-in, honest next step, optional anonymous note</div></div></div>' +
+      '<details class="card team" style="margin-top:22px"><summary><span>What the internal team gets</span></summary><p class="muted" style="margin:12px 0 14px;max-width:44em">Why products disappoint, which products need clearer directions, how what customers hoped for compares with what they got, and what is working, as live anonymous charts.</p><a class="btn fc" href="#/insights">See the Insights dashboard</a></details>' +
+      '<p class="muted" style="font-size:.84rem;margin-top:18px">Privacy: the site never asks for a phone number. Only anonymous counts and redacted notes are kept. Store, cart and payment are simulated; prices are demo prices.</p>';
   }
 
   function viewChat(q) {
@@ -262,22 +247,6 @@
   }
 
   /* Short "idea" sections, shown at the bottom of the FitCheck page (no separate About page). */
-  function aboutBlock() {
-    return '<h2 style="margin-top:36px">Why FitCheck exists</h2>' +
-      '<div class="cols"><div class="card"><h3>The problem</h3><p style="margin:0">When a product disappoints, nothing prompts customers, or makes it easy in the moment, to say so. They quietly drop it or switch, and the brand never learns why.</p></div>' +
-      '<div class="card"><h3>Where it comes from</h3><p style="margin:0">Seven real customer conversations about Be.Bodywise (no names or numbers are used here). Most found a product that worked, but the same product worked for some and not for others, and one said usage guidance was missing.</p></div>' +
-      '<div class="card"><h3>How sure are we?</h3><p style="margin:0">Seven conversations are thin evidence. This is an opportunity worth testing, not a proven problem.</p></div></div>' +
-      '<h2 style="margin-top:28px">What is real and what is simulated</h2><div class="tablewrap"><table class="t"><tr><th>Part</th><th>Status</th></tr>' +
-      '<tr><td>Product guide</td><td>Real information from the pack and public pages. Gaps are marked as not stated.</td></tr>' +
-      '<tr><td>WhatsApp check-in</td><td>Real WhatsApp messages from a demo line. The 30 second wait stands in for one to two weeks.</td></tr>' +
-      '<tr><td>Store, cart, payment</td><td>Simulated. No real orders, payments or deliveries, and no personal details collected.</td></tr>' +
-      '<tr><td>Verdicts and medical guidance</td><td>Fixed, reviewed text. It never diagnoses. Irritation always means stop and see a doctor.</td></tr>' +
-      '<tr><td>Insights</td><td>Live tab: anonymous answers from real demo sessions. Sample tab: invented data, clearly labelled.</td></tr>' +
-      '<tr><td>Prices and photos</td><td>Demo prices. Photos and names belong to their owners and are shown for demonstration.</td></tr></table></div>' +
-      '<h2 style="margin-top:28px">If this were built for real</h2><ul><li>Trigger each check-in from real delivery dates, not a fixed 30 second wait.</li><li>Offer Hinglish and other languages, since many customers chat that way.</li><li>Connect the verdict and reason tags to the support and product teams’ tools.</li><li>A/B test the check-in wording and timing.</li></ul>' +
-      '<p class="muted" style="font-size:.86rem;margin-top:20px">Privacy: the site never asks for a phone number. WhatsApp shares a customer’s number with the FitCheck line only so it can reply. Chat state is kept under a scrambled key for two hours; only anonymous counts and redacted notes are kept. Built with an AI coding assistant (Claude), with the research, product thinking and decisions by the author.</p>';
-  }
-
   function viewNotFound() { return '<div class="empty"><h1>Page not found</h1><a class="btn" href="#/">Back to the store</a></div>'; }
 
   /* ---------- router ---------- */
@@ -377,6 +346,12 @@
   document.addEventListener('change', function (e) {
     if (e.target && e.target.id === 'fcOpt') { memo.fc = e.target.checked; var fp = $('#fcPrice'); if (fp) fp.textContent = memo.fc ? 'Included' : 'Not added'; }
   });
+  /* If an official product photo cannot load, fall back to the local copy. */
+  document.addEventListener('error', function (e) {
+    var im = e.target; if (!im || im.tagName !== 'IMG') return;
+    var src = im.getAttribute('src');
+    for (var i = 0; i < ORDER.length; i++) { var q = PRODUCTS[ORDER[i]]; if (q.imgFallback && q.img === src) { im.setAttribute('src', q.imgFallback); return; } }
+  }, true);
   $('#searchForm').addEventListener('submit', function (e) { e.preventDefault(); });
   $('#searchInput').addEventListener('input', function (e) {
     S.q = e.target.value;

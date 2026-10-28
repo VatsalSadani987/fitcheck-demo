@@ -41,12 +41,34 @@
         var m = list[i];
         if (m.delay >= 5000) await countdown(m.delay);
         else if (m.delay) await sleep(Math.min(m.delay, 900));
-        var t = typing(); await sleep(450); t.remove();
+        var t = typing(); await sleep(350); t.remove();
         bubble('in', fmt(m.body));
         if (m.kind !== 'text') {
-          var box = document.createElement('div'); box.className = 'opts';
+          var box = document.createElement('div'); box.className = 'opts' + (m.multi ? ' multi' : '');
+          if (m.multi) { // several answers at once: tick the boxes, then send
+            var picked = [];
+            var note = document.createElement('small'); note.className = 'mnote'; note.textContent = 'Tick all that apply (up to 3)'; box.appendChild(note);
+            var go = document.createElement('button'); go.type = 'button'; go.className = 'mgo'; go.textContent = 'Send'; go.disabled = true;
+            m.options.forEach(function (o) {
+              var lab = document.createElement('label'); lab.className = 'mopt';
+              var cb = document.createElement('input'); cb.type = 'checkbox'; cb.value = o.id;
+              var sp = document.createElement('span'); sp.textContent = o.title.replace(/^\d+\.\s*/, '');
+              cb.onchange = function () {
+                if (cb.checked && picked.length >= 3) { cb.checked = false; return; }
+                picked = Array.prototype.map.call(box.querySelectorAll('input:checked'), function (i) { return i.value; });
+                go.disabled = !picked.length;
+              };
+              lab.appendChild(cb); lab.appendChild(sp); box.appendChild(lab);
+            });
+            go.onclick = function () {
+              var titles = m.options.filter(function (o) { return picked.indexOf(o.id) >= 0; }).map(function (o) { return o.title.replace(/^\d+\.\s*/, ''); });
+              send({ text: picked.join(', ') }, titles.join(', '));
+            };
+            box.appendChild(go);
+            msgs.appendChild(box); msgs.scrollTop = msgs.scrollHeight; continue;
+          }
           m.options.forEach(function (o) {
-            var b = document.createElement('button'); b.type = 'button'; b.textContent = o.title;
+            var b = document.createElement('button'); b.type = 'button'; b.textContent = o.title; if (o.desc) { var sm = document.createElement('small'); sm.textContent = o.desc; b.appendChild(sm); }
             b.onclick = function () { choose(o); }; box.appendChild(b);
           });
           msgs.appendChild(box); msgs.scrollTop = msgs.scrollHeight;

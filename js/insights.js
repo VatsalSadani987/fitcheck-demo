@@ -15,10 +15,10 @@
 
   /* ---------- sample data (invented, consistent) ---------- */
   function buildSample() {
-    var started = { sa1: 22, aha5: 34, roll: 18, gum: 20, serum: 16, spot: 10 };
+    var started = { sa1: 22, aha5: 34, roll: 18, gum: 20, serum: 16, lotion: 10 };
     var mix = { // answered share, then q1 mix: well, none, notexp, irr, little
       sa1: [0.88, [.50, .14, .16, .06, .14]], aha5: [0.86, [.38, .18, .26, .06, .12]], roll: [0.9, [.50, .12, .22, .04, .12]],
-      gum: [0.85, [.42, .30, .12, 0, .16]], serum: [0.88, [.40, .24, .20, 0, .16]], spot: [0.9, [.44, .12, .22, .10, .12]]
+      gum: [0.85, [.42, .30, .12, 0, .16]], serum: [0.88, [.40, .24, .20, 0, .16]], lotion: [0.9, [.44, .12, .22, .10, .12]]
     };
     var c = { sessions: 96, 'src:whatsapp': 41, 'src:web': 55 };
     var q1k = ['well', 'none', 'notexp', 'irr', 'little'];
@@ -48,7 +48,7 @@
       roll: { n: 15, hope: [2, 5, 6], gap: { longer: 0, aligned: 0, unknown: 13, unsure: 2 }, lessLonger: 0, t: { w2: 9, w4: 4, m3: 0, unsure: 2 }, o: [11, 8, 5, 2], m: [4, 2, 0], pr: { feel: 4, results: 2, smell: 1 } },
       sa1: { n: 16, hope: [5, 6, 3], gap: { longer: 2, aligned: 12, unknown: 0, unsure: 2 }, lessLonger: 1, t: { w2: 5, w4: 7, m3: 3, unsure: 1 }, o: [12, 9, 6, 2], m: [2, 1, 0] },
       gum: { n: 12, hope: [1, 6, 4], gap: { longer: 3, aligned: 7, unknown: 0, unsure: 2 }, lessLonger: 1, t: { w2: 2, w4: 4, m3: 5, unsure: 1 }, o: [8, 6, 4, 1], m: [2, 1, 1] },
-      spot: { n: 6, hope: [1, 1, 1], gap: { longer: 0, aligned: 5, unknown: 0, unsure: 1 }, lessLonger: 0, t: { w2: 4, w4: 1, m3: 0, unsure: 1 }, o: [4, 3, 2, 1], m: [1, 0, 0] }
+      lotion: { n: 6, hope: [1, 1, 1], gap: { longer: 0, aligned: 5, unknown: 0, unsure: 1 }, lessLonger: 0, t: { w2: 4, w4: 1, m3: 0, unsure: 1 }, o: [4, 3, 2, 1], m: [1, 0, 0] }
     };
     ORDER.forEach(function (id) {
       var x = X[id], ex = PRODUCTS[id].expect;
@@ -72,6 +72,24 @@
       ]
     };
   }
+
+  /* Example of what the Gemini readout looks like. Written by hand to match the invented sample numbers; NOT generated live. */
+  var SAMPLE_AI = { source: 'gemini', sample: true,
+    headline: 'Unclear directions and mismatched timing, more than the products themselves, drive most disappointment.',
+    themes: [
+      { title: 'Timing expectations', detail: 'Most 5% AHA BHA wash customers expected results within 2 weeks. The brand page says 3 to 4 months, and 58% said it fell short of their hope.' },
+      { title: 'Unclear directions', detail: 'Half of the reasons given for the Hair Growth Serum were unclear instructions on how much and how often to use it.' },
+      { title: 'Feel of the roll-on', detail: 'The underarm roll-on gets mixed feedback on feel (sticky for the first minute). Worth a look before the next batch.' }
+    ],
+    actions: ['Show the 3 to 4 month timeline on the wash page and in the order confirmation.', 'Add how much and how often to the serum page and pack.', 'Review the roll-on feel notes with the product team.'] };
+  var SAMPLE_X = { source: 'gemini', sample: true,
+    headline: 'The wash is judged too early, while the serum is misused: both are fixable with clearer guidance.',
+    products: [
+      { id: 'aha5', explain: 'Most customers expected visible change within 2 weeks, but the brand page points to 3 to 4 months. The disappointment is mostly about timing.', team_should: 'Put the realistic timeline on the page and send a reassurance message around week 3.' },
+      { id: 'serum', explain: 'Half of those who fell short blamed unclear instructions, not the formula.', team_should: 'Add how much and how often to use it, then re-check in a month.' },
+      { id: 'roll', explain: 'Timing does not explain the gap here. Customers mention how it feels on the skin.', team_should: 'Read the feel notes and review the formula or texture with the product team.' },
+      { id: 'sa1', explain: 'Most customers say it matches or beats their hopes. Their top hope is fewer body breakouts.', team_should: 'Lead the product copy with that promise and use customer wording.' }
+    ] };
 
   /* ---------- helpers ---------- */
   function sumPrefix(c, prefix) { var n = 0; Object.keys(c).forEach(function (k) { if (k.indexOf(prefix) === 0 && k.split(':').length === prefix.split(':').length) n += c[k]; }); return n; }
@@ -171,7 +189,8 @@
     var summ = ruleSummary(c);
     var ai = '<div class="ai" id="aiBox"><span class="tag">' + (sample ? 'What the team would learn' : 'Summary') + '</span><ul>' + summ.map(function (s) { return '<li>' + s + '</li>'; }).join('') + '</ul></div>';
     var notes = '<div class="card" style="margin-top:16px"><h3>Anonymous notes</h3>' + (d.notes && d.notes.length ? d.notes.slice(0, 12).map(function (n) { return '<div class="note">' + esc(n.text) + '<br><small>' + esc((PRODUCTS[n.product] || { name: '' }).name) + (n.tags && n.tags.length ? ' · ' + esc(n.tags.join(', ')) : '') + (n.t ? ' · ' + ago(n.t) : '') + '</small></div>'; }).join('') : '<p class="muted" style="margin:0">No notes yet. Notes appear when a customer chooses to tell the brand and adds a line.</p>') + '</div>';
-    return warn + kpis + charts + ai + expSection(c, sample) + notes + tableView(c) + tools(!sample);
+    var sampleAi = sample ? '<div class="ai" id="aiSample" style="margin-top:14px">' + aiInner(SAMPLE_AI) + '</div>' : '';
+    return warn + kpis + charts + ai + sampleAi + expSection(c, sample) + notes + tableView(c) + tools(!sample);
   }
 
   /* ---------- Expectation vs experience ---------- */
@@ -183,7 +202,7 @@
     var kp = '<div class="kpis" style="margin-bottom:14px"><div class="kpi"><b>' + a.receipts + '</b><span>expectation receipts</span></div>' +
       '<div class="kpi"><b>' + a.answered + '</b><span>compared with what they hoped</span></div>' +
       '<div class="kpi"><b>' + Math.round(100 * a.lessShare) + '%</b><span>said it fell short of their hope</span></div></div>';
-    var ai = sample ? '' : '<div class="xai" id="xaiBox"><h4>Gemini readout</h4><p class="muted" style="margin:0;font-size:.86rem">Loading…</p></div>';
+    var ai = sample ? '<div class="xai" id="xaiBox">' + xInner(SAMPLE_X) + '</div>' : '<div class="xai" id="xaiBox"><h4>Gemini readout</h4><p class="muted" style="margin:0;font-size:.86rem">Loading…</p></div>';
     var cards = a.products.map(function (r) {
       var p = PRODUCTS[r.id], t = r.answered || 1, h = r.hope;
       var seg = function (n, col, lab) { return n ? '<i style="width:' + (100 * n / t) + '%;background:' + col + '" title="' + lab + ': ' + n + '"></i>' : ''; };
@@ -203,14 +222,17 @@
     }).join('');
     return head + kp + ai + '<div class="xgrid">' + cards + '</div>';
   }
+  function xInner(s) {
+    return '<h4>Gemini readout' + (s.sample ? '<span class="samplebadge">SAMPLE · illustrative text, not generated live</span>' : '') + '</h4><p style="font-weight:700;margin:0 0 4px">' + esc(s.headline) + '</p><p class="muted" style="font-size:.78rem;margin:0">Explains the rule-based decisions below. It does not change them. ' + (s.sample ? 'Example text written to match the invented sample numbers.' : 'Check against the numbers before acting.') + '</p>';
+  }
   var lastXAi = null, xTry = 0;
   function renderXAi(s) {
     var box = $('#xaiBox'); if (!box || !s) return;
     if (s.source === 'gemini') {
-      box.innerHTML = '<h4>Gemini readout</h4><p style="font-weight:700;margin:0 0 4px">' + esc(s.headline) + '</p><p class="muted" style="font-size:.78rem;margin:0">Explains the rule-based decisions below. It does not change them. Check against the numbers before acting.</p>';
+      box.innerHTML = xInner(s);
       (s.products || []).forEach(function (x) {
         var card = document.querySelector('[data-xid="' + x.id + '"] .xexp');
-        if (card) card.innerHTML = '<b>Gemini:</b> ' + esc(x.explain) + (x.team_should ? ' <b>Next:</b> ' + esc(x.team_should) : '');
+        if (card) card.innerHTML = '<b>' + (s.sample ? 'Gemini (sample)' : 'Gemini') + ':</b> ' + esc(x.explain) + (x.team_should ? ' <b>Next:</b> ' + esc(x.team_should) : '');
       });
     } else {
       box.innerHTML = '<h4>Gemini readout</h4><p class="muted" style="margin:0;font-size:.86rem">Not available' + (s.reason ? ' (' + esc(s.reason) + ')' : '') + '. The rule-based decisions below still apply.</p>';
@@ -258,16 +280,17 @@
 
   var lastJson = '', lastAi = null, aiTry = 0, lastXTotal = -1;
 
+  function aiInner(s) {
+    return '<span class="tag">' + (s.sample ? 'SAMPLE · Gemini readout' : 'AI summary · Gemini') + '</span>' + (s.sample ? '<span class="samplebadge">Illustrative text, not generated live</span>' : '') +
+      '<p style="font-weight:700;margin:8px 0 6px">' + esc(s.headline) + '</p>' +
+      '<ul>' + s.themes.map(function (t) { return '<li><b>' + esc(t.title) + ':</b> ' + esc(t.detail) + '</li>'; }).join('') + '</ul>' +
+      (s.actions && s.actions.length ? '<p style="margin:10px 0 2px;font-weight:700">Suggested actions</p><ul>' + s.actions.map(function (a) { return '<li>' + esc(a) + '</li>'; }).join('') + '</ul>' : '') +
+      '<p class="muted" style="font-size:.78rem;margin:8px 0 0">' + (s.sample ? 'This is an example of what the live tab shows once a Gemini key is connected, written to match the invented sample numbers.' : 'Written by an AI model from the anonymous numbers and notes above. Check against the data before acting.') + '</p>';
+  }
   function renderAi(s) {
     var box = $('#aiBox'); if (!box || !s) return;
-    if (s.source === 'gemini') {
-      box.innerHTML = '<span class="tag">AI summary · Gemini</span><p style="font-weight:700;margin:0 0 6px">' + esc(s.headline) + '</p>' +
-        '<ul>' + s.themes.map(function (t) { return '<li><b>' + esc(t.title) + ':</b> ' + esc(t.detail) + '</li>'; }).join('') + '</ul>' +
-        (s.actions && s.actions.length ? '<p style="margin:10px 0 2px;font-weight:700">Suggested actions</p><ul>' + s.actions.map(function (a) { return '<li>' + esc(a) + '</li>'; }).join('') + '</ul>' : '') +
-        '<p class="muted" style="font-size:.78rem;margin:8px 0 0">Written by an AI model from the anonymous numbers and notes above. Check against the data before acting.</p>';
-    } else if (s.error) {
-      box.insertAdjacentHTML('beforeend', '<p class="muted" style="font-size:.78rem;margin:8px 0 0">AI summary unavailable: ' + esc(s.error) + ' (showing the built-in summary).</p>');
-    }
+    if (s.source === 'gemini') box.innerHTML = aiInner(s);
+    else if (s.error) box.insertAdjacentHTML('beforeend', '<p class="muted" style="font-size:.78rem;margin:8px 0 0">AI summary unavailable: ' + esc(s.error) + ' (showing the built-in summary).</p>');
   }
   function loadAi() {
     aiTry = Date.now();
@@ -290,6 +313,7 @@
         var k = window.prompt('Enter the admin key (ADMIN_KEY in Vercel) to clear the live test data:'); if (!k) return;
         fetch('api/reset', { method: 'POST', headers: { 'x-admin-key': k } }).then(function (r) { return r.json(); }).then(function (j) { window.alert(j.ok ? 'Cleared.' : (j.error || 'Could not clear.')); lastJson = ''; lastAi = null; poll(); }).catch(function () { window.alert('Could not reach the server.'); });
       };
+      if (sample) renderXAi(SAMPLE_X);
       if (!sample && (d.counts || {}).sessions) {
         if (lastAi) renderAi(lastAi);
         if ($('#xaiBox')) { if (lastXAi) renderXAi(lastXAi); var xs = Object.keys(c).reduce(function (n, k) { return n + (k.indexOf('x:h:') === 0 ? c[k] : 0); }, 0); if (xs !== lastXTotal || (!lastXAi || lastXAi.source !== 'gemini') && Date.now() - xTry > 60000) { lastXTotal = xs; loadXAi(); } }
