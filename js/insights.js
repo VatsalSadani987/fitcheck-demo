@@ -316,7 +316,7 @@
       if (sample) renderXAi(SAMPLE_X);
       if (!sample && (d.counts || {}).sessions) {
         if (lastAi) renderAi(lastAi);
-        if ($('#xaiBox')) { if (lastXAi) renderXAi(lastXAi); var xs = Object.keys(c).reduce(function (n, k) { return n + (k.indexOf('x:h:') === 0 ? c[k] : 0); }, 0); if (xs !== lastXTotal || (!lastXAi || lastXAi.source !== 'gemini') && Date.now() - xTry > 60000) { lastXTotal = xs; loadXAi(); } }
+        if ($('#xaiBox')) { if (lastXAi) renderXAi(lastXAi); var cc = d.counts, xs = Object.keys(cc).reduce(function (n, k) { return n + (k.indexOf('x:h:') === 0 ? cc[k] : 0); }, 0); if (xs !== lastXTotal || (!lastXAi || lastXAi.source !== 'gemini') && Date.now() - xTry > 60000) { lastXTotal = xs; loadXAi(); } }
         var failed = !lastAi || lastAi.source !== 'gemini';
         if (d.counts.sessions !== lastTotal || (failed && Date.now() - aiTry > 60000)) { lastTotal = d.counts.sessions; loadAi(); }
       }
