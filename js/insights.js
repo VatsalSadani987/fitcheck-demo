@@ -240,7 +240,7 @@
   }
   function loadXAi() {
     xTry = Date.now();
-    fetch('api/expectation').then(function (r) { return r.ok ? r.json() : null; }).then(function (s) { if (s) { lastXAi = s; renderXAi(s); } }).catch(function () { /* keep rule-based cards */ });
+    fetch('api/expectation').then(function (r) { return r.ok ? r.json() : { source: 'rules', reason: 'the service returned an error (' + r.status + '). Check that api/expectation.js was uploaded.' }; }).then(function (s) { if (s) { lastXAi = s; renderXAi(s); } }).catch(function () { /* keep rule-based cards */ });
   }
 
   function feedHtml(feed, sample) {
@@ -290,13 +290,13 @@
   function renderAi(s) {
     var box = $('#aiBox'); if (!box || !s) return;
     if (s.source === 'gemini') box.innerHTML = aiInner(s);
-    else if (s.error) box.insertAdjacentHTML('beforeend', '<p class="muted" style="font-size:.78rem;margin:8px 0 0">AI summary unavailable: ' + esc(s.error) + ' (showing the built-in summary).</p>');
+    else if (s.error || s.reason) box.insertAdjacentHTML('beforeend', '<p class="muted" style="font-size:.78rem;margin:8px 0 0">AI summary unavailable: ' + esc(s.error || s.reason) + ' (showing the built-in summary).</p>');
   }
   function loadAi() {
     aiTry = Date.now();
-    fetch('api/summary').then(function (r) { return r.ok ? r.json() : null; }).then(function (s) {
+    fetch('api/summary').then(function (r) { return r.ok ? r.json() : { source: 'rules', reason: 'the summary service returned an error (' + r.status + '). Check that api/summary.js and its files were uploaded.' }; }).then(function (s) {
       if (!s) return;
-      lastAi = (s.source === 'gemini' || s.error) ? s : null;
+      lastAi = (s.source === 'gemini' || s.error || s.reason) ? s : null;
       renderAi(lastAi);
     }).catch(function () { /* keep the built-in summary */ });
   }
