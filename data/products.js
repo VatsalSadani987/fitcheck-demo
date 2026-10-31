@@ -6,12 +6,12 @@
   else root.FitProducts = factory();
 })(typeof self !== 'undefined' ? self : this, function () {
   var NS = 'Not stated on the pages we checked. Check your pack.';
-  /* Official product photos load from the brand's own image host. If one cannot load, the local copy in img/ is used instead. */
+  /* Product photos are stored locally in img/. */
   var CDN = 'https://i.mscwlns.co/media/misc/pdp_rcl/';
   var PRODUCTS = {
     sa1: {
       id: 'sa1', name: '1% Salicylic Acid Body Wash', short: 'Body acne and bumps', size: '375 ml', price: 399,
-      img: CDN + '1-salicylic-acid-body-wash-350ml/375ml%20-%20Hero_96u9ib.jpg?tr=w-600', imgFallback: 'img/sa-body-wash-1.jpg', tag: 'Body wash',
+      img: 'img/sa-body-wash-1.jpg', tag: 'Body wash',
       forShort: 'Unclogs pores to help prevent body acne and exfoliates dead skin cells.',
       forList: ['Brand page: exfoliates dead skin cells and unclogs pores to help prevent body acne.', 'Has 1% salicylic acid, chamomile extract and Pentavitin. Free of sulphates and silicones.'],
       how: ['Take an adequate amount of wash in your palms or on a loofah.', 'Apply on wet skin in gentle circular motions.', 'Rinse thoroughly.'],
@@ -76,7 +76,7 @@
     },
     lotion: {
       id: 'lotion', name: '10% Urea Body Lotion', short: 'Dry and flaky skin', size: '300 ml', price: 499,
-      img: CDN + '10-urea-lotion-300ml/1%20%282%29_35woe0.jpg?tr=w-600', imgFallback: 'img/urea-lotion-10.jpg', tag: 'Body lotion',
+      img: 'img/urea-lotion-10.jpg', tag: 'Body lotion',
       forShort: 'A lightweight, non-greasy lotion for mild to moderate dry skin.',
       forList: ['Brand page: hydrates, softens and exfoliates, with up to 48 hours of moisture.', 'Has 10% urea, mango and kokum butter, shea butter and a ceramide complex.'],
       how: ['Pump out a generous amount.', 'Massage an even layer all over the body until it is absorbed.', 'Use it morning and night.'],
@@ -193,5 +193,16 @@
   }
   var CATS = [['all', 'Shop all'], ['body', 'Body care'], ['hair', 'Hair care'], ['acne', 'Acne care']];
   var ORDER = ['sa1', 'aha5', 'roll', 'lotion', 'gum', 'serum'];
+  /* Swap reasons: only products in this store, plus one variant the official Be.Bodywise site lists (fragrance-free roll-on). */
+  var SWAPWHY = {
+    sa1: { aha5: { en: 'Pick this if you want exfoliation plus de-tanning and brightening, not only acne care. It has three acids (lactic, glycolic and salicylic), so patch test first.', hi: 'Ye tab chuniye jab aapko sirf acne care nahi, exfoliation, de-tan aur brightening bhi chahiye. Isme teen acid hain (lactic, glycolic aur salicylic), isliye pehle patch test kijiye.' } },
+    aha5: { sa1: { en: 'Pick this if you mainly want acne care, or want something simpler: one active (1% salicylic acid), free of sulphates and silicones.', hi: 'Ye tab chuniye jab aapko mainly acne care chahiye, ya kuch simple chahiye: ek hi active (1% salicylic acid), sulphate aur silicone free.' } }
+  };
+  var SWAPEXT = {
+    roll: [{ when: ['smell'], en: 'If the smell was the issue: the Be.Bodywise site also lists a fragrance-free version of the same 6% AHA BHA roll-on. It is not part of this demo store, so check the current listing.', hi: 'Agar problem smell ki thi: Be.Bodywise ki site par isi 6% AHA BHA roll-on ka fragrance-free version bhi listed hai. Ye is demo store mein nahi hai, isliye current listing dekh lijiye.' }]
+  };
+  Object.keys(SWAPWHY).forEach(function (k) { PRODUCTS[k].swapWhy = SWAPWHY[k]; });
+  Object.keys(SWAPEXT).forEach(function (k) { PRODUCTS[k].swapExt = SWAPEXT[k]; });
+
   return { PRODUCTS: PRODUCTS, ORDER: ORDER, CATS: CATS, TIMES: TIMES, timeGap: timeGap, NOT_STATED: NS };
 });
