@@ -193,16 +193,128 @@
   }
   var CATS = [['all', 'Shop all'], ['body', 'Body care'], ['hair', 'Hair care'], ['acne', 'Acne care']];
   var ORDER = ['sa1', 'aha5', 'roll', 'lotion', 'gum', 'serum'];
-  /* Swap reasons: only products in this store, plus one variant the official Be.Bodywise site lists (fragrance-free roll-on). */
+  /* Swap reasons: other products in this store, plus options listed on the official Be.Bodywise site (checked 31 Oct 2026).
+     Official-site options are not sold in this demo store. They carry a link, the listed price, and a "when" list of check-in reasons. */
+  var DAY = 'Listed on bebodywise.com on 31 Oct 2026. Prices and stock can change.';
   var SWAPWHY = {
     sa1: { aha5: { en: 'Pick this if you want exfoliation plus de-tanning and brightening, not only acne care. It has three acids (lactic, glycolic and salicylic), so patch test first.', hi: 'Ye tab chuniye jab aapko sirf acne care nahi, exfoliation, de-tan aur brightening bhi chahiye. Isme teen acid hain (lactic, glycolic aur salicylic), isliye pehle patch test kijiye.' } },
     aha5: { sa1: { en: 'Pick this if you mainly want acne care, or want something simpler: one active (1% salicylic acid), free of sulphates and silicones.', hi: 'Ye tab chuniye jab aapko mainly acne care chahiye, ya kuch simple chahiye: ek hi active (1% salicylic acid), sulphate aur silicone free.' } }
   };
   var SWAPEXT = {
-    roll: [{ when: ['smell'], en: 'If the smell was the issue: the Be.Bodywise site also lists a fragrance-free version of the same 6% AHA BHA roll-on. It is not part of this demo store, so check the current listing.', hi: 'Agar problem smell ki thi: Be.Bodywise ki site par isi 6% AHA BHA roll-on ka fragrance-free version bhi listed hai. Ye is demo store mein nahi hai, isliye current listing dekh lijiye.' }]
+    sa1: [
+      { when: ['feel', 'results'], name: '1% Salicylic Ceramide Body Wash', size: '250 ml', price: '₹549', url: 'https://bebodywise.com/product/salicylic-ceramide-bodywash',
+        en: 'Same 1% salicylic acid, with a ceramide complex and chamomile. The page says it moisturises and strengthens the skin barrier, and suits body acne with dry skin.',
+        hi: 'Wahi 1% salicylic acid, saath mein ceramide complex aur chamomile. Page ke hisaab se ye skin barrier ko majboot karta hai aur dry skin ke saath body acne ke liye hai.' },
+      { when: ['feel'], name: 'Triple Milk Deep Hydrating Body Wash', size: '250 ml', price: '₹499', url: 'https://bebodywise.com/product/triple-milk-deep-hydrating-bodywash-xp',
+        en: 'A gentler, hydrating wash with shea, coconut and oat milk. It is for dry, dehydrated skin and is not an acne treatment.',
+        hi: 'Ek halka, hydrating wash jisme shea, coconut aur oat milk hai. Ye dry, dehydrated skin ke liye hai, acne ka treatment nahi.' }
+    ],
+    aha5: [
+      { when: ['feel', 'results'], name: '1% Salicylic Ceramide Body Wash', size: '250 ml', price: '₹549', url: 'https://bebodywise.com/product/salicylic-ceramide-bodywash',
+        en: 'One exfoliating acid (1% salicylic) with a ceramide complex and chamomile. A simpler formula if three acids felt like too much.',
+        hi: 'Ek hi exfoliating acid (1% salicylic) ceramide complex aur chamomile ke saath. Agar teen acid zyada lage to ye simple formula hai.' },
+      { when: ['feel'], name: 'Triple Milk Deep Hydrating Body Wash', size: '250 ml', price: '₹499', url: 'https://bebodywise.com/product/triple-milk-deep-hydrating-bodywash-xp',
+        en: 'If your skin felt dry after the AHA BHA wash: a hydrating wash for dry skin, with shea, coconut and oat milk. It will not de-tan.',
+        hi: 'Agar AHA BHA wash ke baad skin dry lagi: dry skin ke liye hydrating wash, shea, coconut aur oat milk ke saath. Ye de-tan nahi karega.' }
+    ],
+    roll: [
+      { when: ['smell'], name: '4% AHA BHA Underarm Roll On, Fragrance Free', size: '75 ml', price: '₹374', url: 'https://bebodywise.com/product/4-aha-bha-underarm-rollon-frag-free-75',
+        en: 'Sold as the fragrance-free version, with lower acid strength (4%). For mild pigmentation. Its ingredient list still shows "Perfume", so check the pack if you avoid scent.',
+        hi: 'Fragrance-free version ke roop mein listed hai, aur acid kam hai (4%). Mild pigmentation ke liye. Iski ingredient list mein "Perfume" likha hai, isliye scent se bachna ho to pack check kijiye.' },
+      { when: ['smell'], name: '6% AHA BHA Underarm Roll On, Aqua', size: '75 ml', price: '₹499', url: 'https://bebodywise.com/product/6-aha-bha-underarm-roll-on-aqua-75ml',
+        en: 'The same 6% roll-on in a different fragrance (Aqua instead of Flora).',
+        hi: 'Wahi 6% roll-on, alag fragrance mein (Flora ki jagah Aqua).' },
+      { when: ['feel', 'results'], name: '4% AHA BHA Underarm Roll On', size: '75 ml', price: 'see site', url: 'https://bebodywise.com/product/4-aha-bha-underarm-rollon-75',
+        en: 'A lower-strength option (4%), listed for mild pigmentation. Not for severe pigmentation.',
+        hi: 'Kam strength ka option (4%), mild pigmentation ke liye listed. Severe pigmentation ke liye nahi.' }
+    ],
+    lotion: [
+      { when: ['results'], name: '20% Urea Lotion', size: '300 ml', price: '₹569', url: 'https://bebodywise.com/product/20-urea-lotion-xp',
+        en: 'A stronger urea lotion for dry to very dry, flaky skin. Try it if the 10% was not enough, and patch test first.',
+        hi: 'Dry se bahut dry, flaky skin ke liye zyada urea wala lotion. Agar 10% kaafi nahi laga to try kijiye, pehle patch test ke saath.' }
+    ]
   };
   Object.keys(SWAPWHY).forEach(function (k) { PRODUCTS[k].swapWhy = SWAPWHY[k]; });
   Object.keys(SWAPEXT).forEach(function (k) { PRODUCTS[k].swapExt = SWAPEXT[k]; });
+
+  /* Fit details from the official product pages (bebodywise.com, read 31 Oct 2026). Wording is shortened. Anything the page did not say is left out or marked.
+     reviews: short excerpts of customer reviews shown on the page (first name and initial as shown there). Gemini summarises these; it is never given anything else. */
+  var DETAIL = {
+    sa1: {
+      url: 'https://bebodywise.com/product/1-salicylic-acid-body-wash-375ml-xp',
+      key: [['Salicylic acid', 'A BHA that gently exfoliates and unclogs pores.'], ['Chamomile extract', 'Soothes inflamed skin.'], ['Pentavitin', 'Gives instant hydration.']],
+      full: null, free: 'Free of sulphates and silicones (brand page).',
+      skin: 'Made for mild body acne and mild strawberry skin. The FAQ says all skin types can use it. Sensitive skin: patch test first.',
+      scent: 'Not stated on the page.', avoid: 'Not recommended for very dry skin (brand page).',
+      goodFit: ['You have mild body acne or bumpy, strawberry-like skin.', 'You want one simple daily wash.'],
+      think: ['Your skin is very dry.', 'You also want de-tanning (see the 5% AHA BHA wash).'],
+      rating: { avg: 4.8, count: 2234, sold: '311K' },
+      reviewNote: 'Both reviews shown on the page describe a body care routine or kit, not this wash alone.',
+      reviews: [{ n: 'Rina', t: 'I see reduction of my back and arm acne and my skin feels smoother now. (Used as part of a routine.)' }, { n: 'Krina S.', t: 'Their body wash and lotion together have healed my skin.' }]
+    },
+    aha5: {
+      url: 'https://bebodywise.com/product/5-aha-bha-bodywash-700ml',
+      key: [['Salicylic acid', 'Unclogs pores.'], ['Lactic acid', 'Evens skin tone.'], ['Glycolic acid', 'Exfoliates rough skin.'], ['Vitamin E (tocopheryl acetate)', 'Deeply hydrates.']],
+      full: 'Aqua, Coco-Glucoside, Cocamidopropyl Betaine, Triethanolamine, Lactic Acid, 1,2-Propandiol, Glycerin, Glycolic Acid, Acrylates/C10-30 Alkyl Acrylate Crosspolymer, Aloe Barbadensis (Aloevera) Leaf Extract, Perfume, Polysorbate 20, Salicylic Acid, Phenoxyethanol (and) Ethylhexylglycerin, Erythritol, Natural Perlite Beads, Encapsulated Blue Beads, Disodium EDTA, Tocopheryl Acetate, CI 42090',
+      free: null,
+      skin: 'The page lists normal, dry, oily, combination and sensitive skin. Patch test first.',
+      scent: 'Perfume is in the ingredient list. Sold in two scents: Aqua and Flora.', avoid: 'Made for the body. The FAQ says it may be too potent for the face.',
+      goodFit: ['You want de-tanning, smoother texture and brighter-looking skin.', 'You are fine starting slowly: 2 to 3 uses a week.'],
+      think: ['You want the simplest formula (it has three acids).', 'You will not use sun protection after exfoliating.'],
+      rating: { avg: 4.7, count: 491, sold: '75K' },
+      reviews: [{ n: 'Aditi S.', t: 'Used it for 2 months and my tan has faded and skin feels smoother.' }, { n: 'Riya M.', t: 'It has really helped with my strawberry skin after using consistently. Gentle and non-drying.' }, { n: 'Ishita J.', t: 'After a month of regular use, the tiny dark dots on my upper arms are much lighter.' }, { n: 'Neha V.', t: 'Safe to use everyday and gives results.' }]
+    },
+    roll: {
+      url: 'https://bebodywise.com/product/6-aha-bha-underarm-roll-on-flora-75ml',
+      key: [['4% lactic acid', 'Increases cell turnover to help skin texture.'], ['1% salicylic acid', 'Helps block sweat-causing bacteria.'], ['1% kojic acid', 'An antioxidant said to help reduce dark spots.'], ['1% mandelic acid', 'A micro-exfoliant said to fade surface pigmentation.'], ['Alpha arbutin and mulberry extract', 'Named as pigmentation-reducing actives.']],
+      full: 'Aqua, Lactic Acid, Propylene Glycol, Butyrospermum Parkii (Shea) Butter, Glycerin, Perfume, Aqua (and) Sodium Benzoate (and) Potassium Sorbate, Kojic Acid, Mandelic Acid, Salicylic Acid, Silica, Alpha Arbutin, Morus Alba (Mulberry) Extract, PEG-40 Hydrogenated Castor Oil, Tocopheryl Acetate, Acacia Senegal Gum (and) Xanthan Gum, Polysorbate 20, Xanthan Gum, Sodium Lactate',
+      free: 'Free of parabens, aluminium-based antiperspirant agents, silicones, sulfates and phthalates (brand page).',
+      skin: 'The page lists normal, dry, oily, combination and sensitive skin. Patch test first.',
+      scent: 'Flora fragrance. Also sold in Aqua, and a 4% version listed as fragrance-free.', avoid: 'Do not apply on broken or irritated skin. Wait 6 to 12 hours after waxing.',
+      goodFit: ['You want odour control and lighter underarms in one step.', 'You can use it daily and give it about 3 months.'],
+      think: ['You are sensitive to fragrance (this one is Flora scented).', 'Your skin is broken or irritated right now.'],
+      rating: { avg: 4.8, count: 535, sold: '180K' },
+      reviews: [{ n: 'Niyoshi S.', t: 'It keeps me odor-free and has significantly reduced underarm pigmentation.' }, { n: 'Ruta T.', t: 'Long-lasting and effective, with an amazing, refreshing fragrance.' }, { n: 'Prachi D.', t: 'Does not leave any stain on my clothes, and my body odour is gone.' }, { n: 'Priya R.', t: 'Lasts all day. Even after the gym I am still odour-free.' }]
+    },
+    gum: {
+      url: 'https://bebodywise.com/product/biotin-hair-gummies-120',
+      key: [['Biotin', 'The page says it helps hair growth.'], ['Zinc', 'The page says it is important for hair tissue growth and repair.'], ['Vitamins B12, B9, B6, D2, A, C and E', 'Multivitamin support.']],
+      full: 'Chicory Root Extract, Pectin (E440), Acidity Regulator (E330), Beta-Sitosterol, Vitamin H (Biotin), Vitamin B6 (Pyridoxine HCl), Ferrous Fumarate, Grape Seed Extract, Vitamin B12 (Cyanocobalamin), Vitamin B9 (Folic acid), Vitamin D2 (Ergocalciferol), Zinc Citrate Dihydrate, Sesbania Extract, Vitamin A (Retinol Palmitate), Vitamin C (Ascorbic Acid), Vitamin E (Tocopherol Acetate), Strawberry Color, Strawberry Flavor, Guar Gum, Maize Starch',
+      free: 'Page says free of gelatin and animal-derived ingredients.',
+      skin: 'A supplement, so skin type does not apply. For women over 18.',
+      scent: 'Strawberry flavour.', avoid: 'If you are nursing, ask a healthcare professional before use.',
+      goodFit: ['You want a daily, vegetarian hair supplement.', 'You can stay consistent for about 3 months.'],
+      think: ['You want a quick fix (the page says not in month 1).', 'You are nursing: ask a healthcare professional first.'],
+      rating: { avg: 4.5, count: 332, sold: '71K' },
+      reviewNote: 'Reviews are from the 120-gummy page. The ingredients are the same as the 30-gummy pack.',
+      reviews: [{ n: 'Niharika S.', t: 'Have used this for more than 3 months now and my hair health has totally improved.' }, { n: 'Harini S.', t: 'Saw noticeable results within 3 months and plans to keep using it.' }, { n: 'Amrita S.', t: 'Within 2 months my hair fall reduced significantly.' }]
+    },
+    serum: {
+      url: 'https://bebodywise.com/product/hair-growth-pack-30ml-xp',
+      key: [['3% Rosemary', 'Aims to improve scalp circulation.'], ['3% Redensyl', 'Plant-derived; aims to reactivate dormant follicles.'], ['2% Aminexil', 'Aims to strengthen the structure around follicles.'], ['2% Anagain', 'Aims to trigger hair growth factors.']],
+      full: null, free: 'Free of parabens, sulfates, phthalates and petroleum (brand page, combo pack).',
+      skin: 'For the scalp. Women over 18.',
+      scent: 'Not stated on the page.', avoid: 'Check with a doctor first if you have allergies. Scalp only.',
+      goodFit: ['You have moderate hair fall or early thinning.', 'You can apply it regularly and wait at least 3 months.'],
+      think: ['You want results in a month (the page says not in month 1).', 'You have allergies: check with a doctor first.'],
+      rating: { avg: 4.7, count: 144, sold: '102K' },
+      reviewNote: 'These are reviews of the serum and gummies combo pack, shown on the official page, so they are not for the serum alone.',
+      reviews: [{ n: 'Supriya D.', t: 'I am very impressed with the results.' }, { n: 'Aditi S.', t: 'Thinner hair with improved volume and reduced fall after 3 months.' }, { n: 'Simran A.', t: 'Reduced hair fall and new growth after 3 months.' }]
+    },
+    lotion: {
+      url: 'https://bebodywise.com/product/10-urea-lotion-300ml',
+      key: [['10% urea', 'Hydrates, exfoliates and softens; supports the skin barrier.'], ['3% mango seed butter', 'Nourishing; rich in antioxidants and vitamins A and E.'], ['3% kokum seed butter', 'Hydrates without feeling greasy.'], ['Ceramide complex', 'Part of the formula (listed on the page).']],
+      full: 'Aqua, Urea, Glycerin, Butyrospermum Parkii (Shea) Butter, Ceteareth-20 (and) Cetostearyl Alcohol, Garcinia Indica (Kokum) Seed Butter, Mangifera Indica (Mango) Seed Butter, Butylene Glycol, Cetyl Alcohol, Cyclopentasiloxane, Dimethicone, Phenoxyethanol (and) Ethylhexylglycerin, Perfume, Tocopheryl Acetate, Stearic Acid, Zinc Oxide, Butylated Hydroxytoluene, Disodium EDTA, Imidazolidinyl Urea, Polyacrylate-13 and Polyisobutene and Polysorbate-20, Ceramide complex (Ceramide NP, AP, EOP, Phytosphingosine, Cholesterol and others)',
+      free: 'Free of alcohol and parabens (brand page). Has silicones (dimethicone).',
+      skin: 'Listed for mild to moderate dry skin.',
+      scent: 'Perfume is in the ingredient list.', avoid: 'Patch test first. Stop if redness or irritation occurs.',
+      goodFit: ['Your skin is mildly to moderately dry.', 'You want a light, non-greasy lotion with up to 48 hours of moisture.'],
+      think: ['Your skin is very dry and flaky (the brand lists a 20% urea lotion).', 'You avoid fragrance or silicones.'],
+      rating: { avg: 4.7, count: 1112, sold: '93K' },
+      reviews: [{ n: 'Niyati J.', t: 'Repaired my dry and damaged skin.' }, { n: 'Ruta T.', t: 'Only soft skin. No dry marks after 15 hours.' }, { n: 'Prachi D.', t: 'My dry skin loves it. Deep nourishment and long-lasting moisture.' }, { n: 'Smita S.', t: 'So good. So soft and supple.' }]
+    }
+  };
+  Object.keys(DETAIL).forEach(function (k) { PRODUCTS[k].detail = DETAIL[k]; });
 
   return { PRODUCTS: PRODUCTS, ORDER: ORDER, CATS: CATS, TIMES: TIMES, timeGap: timeGap, NOT_STATED: NS };
 });
