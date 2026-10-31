@@ -452,3 +452,9 @@ details.team>summary:focus-visible{outline:2px solid var(--fc);outline-offset:4p
 .opts .mgo{background:#0a7a65;color:#fff;border-color:#0a7a65}
 .opts .mgo:hover{background:#08604f}
 .opts .mgo:disabled{opacity:.5}
+
+/* How FitCheck decides */
+.decide{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+.decide h3{margin:0 0 8px;font-size:1rem}
+.decide ul{margin:0;padding-left:1.1em;font-size:.9rem}
+.decide li{margin-bottom:6px}
