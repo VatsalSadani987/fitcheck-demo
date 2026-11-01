@@ -156,7 +156,7 @@
   var timer = null, lastTotal = -1, lastData = null;
 
   function view() {
-    return '<span class="eyebrow"><span class="fcdot"></span>FitCheck Insights</span><h1 style="margin-top:8px">What the Be.Bodywise team would see</h1><span class="muted" style="font-size:.72rem">build 6b</span>' +
+    return '<span class="eyebrow"><span class="fcdot"></span>FitCheck Insights</span><h1 style="margin-top:8px">What the Be.Bodywise team would see</h1><span class="muted" style="font-size:.72rem">build 6c</span>' +
       '<p class="muted" style="max-width:48em">Anonymous answers only: no names, no phone numbers. Every WhatsApp or browser check-in updates the Live tab in seconds.</p>' +
       '<div class="ins-bar"><div class="seg" role="tablist"><button class="on" data-seg="live" role="tab" type="button">Live demo sessions</button><button data-seg="sample" role="tab" type="button">Sample data</button></div><span id="segTag"></span><span class="muted" id="stamp" style="font-size:.82rem"></span></div>' +
       '<div id="insBody"></div>';
@@ -190,7 +190,7 @@
     var ai = '<div class="ai" id="aiBox"><span class="tag">' + (sample ? 'What the team would learn' : 'Summary') + '</span><ul>' + summ.map(function (s) { return '<li>' + s + '</li>'; }).join('') + '</ul></div>';
     var notes = '<div class="card" style="margin-top:16px"><h3>Anonymous notes</h3>' + (d.notes && d.notes.length ? d.notes.slice(0, 12).map(function (n) { return '<div class="note">' + esc(n.text) + '<br><small>' + esc((PRODUCTS[n.product] || { name: '' }).name) + (n.tags && n.tags.length ? ' · ' + esc(n.tags.join(', ')) : '') + (n.t ? ' · ' + ago(n.t) : '') + '</small></div>'; }).join('') : '<p class="muted" style="margin:0">No notes yet. Notes appear when a customer chooses to tell the brand and adds a line.</p>') + '</div>';
     var sampleAi = sample ? '<div class="ai" id="aiSample" style="margin-top:14px">' + aiInner(SAMPLE_AI) + '</div>' : '';
-    return warn + kpis + charts + ai + sampleAi + expSection(c, sample) + impactSection(c, sample) + notes + tableView(c) + tools(!sample);
+    return warn + kpis + charts + ai + sampleAi + expSection(c, sample) + impactSection(c, sample) + notes + tools(!sample);
   }
 
   /* ---------- Expectation vs experience ---------- */
@@ -287,13 +287,6 @@
     }).join('') + '</ul>';
   }
 
-  function tableView(c) {
-    var rows = '';
-    [['How is it going?', L.q1, 'q1'], ['Verdicts', L.verdict, 'verdict'], ['Reasons', L.reason, 'reason'], ['Usage', L.use, 'use']].forEach(function (g) {
-      Object.keys(g[1]).forEach(function (k) { rows += '<tr><td>' + g[0] + '</td><td>' + esc(g[1][k]) + '</td><td>' + (c[g[2] + ':' + k] || 0) + '</td></tr>'; });
-    });
-    return '<details class="card tbl-toggle" style="margin-top:16px"><summary style="cursor:pointer;font-weight:700">View the numbers as a table</summary><div class="tablewrap" style="margin-top:12px"><table class="t"><tr><th>Group</th><th>Answer</th><th>Count</th></tr>' + rows + '</table></div></details>';
-  }
   function tools(live) {
     return '<div class="tools"><button class="btn ghost sm" id="csvBtn" type="button">Download CSV (opens in Excel or Google Sheets)</button>' + (live ? '<button class="link" id="resetBtn" type="button">Clear test data</button>' : '') + '</div>';
   }

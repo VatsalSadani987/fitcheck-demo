@@ -169,19 +169,26 @@
   /* ---------- fit and reviews (details from the official product pages) ---------- */
   function fitSection(p) {
     var d = p.detail; if (!d) return '';
-    var list = function (a) { return '<ul>' + a.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>'; };
-    var facts = [['Who it suits', d.skin], ['Scent', d.scent], ['Free of', d.free], ['Check first', d.avoid]].filter(function (f) { return f[1]; });
-    var ing = '<table class="ingt"><thead><tr><th scope="col">Key ingredient</th><th scope="col">What the page says it does</th></tr></thead><tbody>' + d.key.map(function (k) { return '<tr><td>' + esc(k[0]) + '</td><td>' + esc(k[1]) + '</td></tr>'; }).join('') + '</tbody></table>';
-    var full = d.full ? '<details class="fulling"><summary>Full ingredient list</summary><p>' + esc(d.full) + '</p></details>' : '<p class="muted" style="font-size:.86rem;margin:10px 0 0">The official page lists only the key ingredients above, not a full list. Check your pack for the full list.</p>';
+    var li = function (a) { return '<ul>' + a.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>'; };
+    var ing = '<ul class="ing">' + d.key.map(function (k) { return '<li><b>' + esc(k[0]) + '</b><span>' + esc(k[1]) + '</span></li>'; }).join('') + '</ul>' +
+      (d.full ? '<details class="fulling"><summary>Full ingredient list</summary><p>' + esc(d.full) + '</p></details>' : '<p class="muted" style="font-size:.82rem;margin:8px 0 0">The official page shows only the key ingredients. Check your pack for the full list.</p>');
+    var steps = '<ol class="mini">' + p.how.slice(0, 3).map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ol>';
+    var facts = [['Suits', d.skin], ['Scent', d.scent], ['Free of', d.free]].filter(function (f) { return f[1]; });
     var alts = (p.swapExt || []).filter(function (e) { return e.name; }), others = (p.swap || []).map(function (id) { return PRODUCTS[id]; });
-    var alt = (others.length || alts.length) ? '<div class="alts"><h3>If it is not the right fit</h3><ul>' +
+    var alt = (others.length || alts.length) ? '<details class="alts"><summary>If it is not the right fit</summary><ul>' +
       others.map(function (o) { return '<li><a href="#/p/' + o.id + '"><b>' + esc(o.name) + '</b></a> <span class="muted">· ' + esc(o.size) + ' · in this store</span><br><span class="muted">' + esc(p.swapWhy[o.id].en) + '</span></li>'; }).join('') +
       alts.map(function (e) { return '<li><a href="' + esc(e.url) + '" target="_blank" rel="noopener"><b>' + esc(e.name) + '</b></a> <span class="muted">· ' + esc(e.size) + (e.price !== 'see site' ? ' · ' + esc(e.price) : '') + ' · official site</span><br><span class="muted">' + esc(e.en) + '</span></li>'; }).join('') +
-      '</ul>' + (alts.length ? '<p class="muted" style="font-size:.78rem;margin:8px 0 0">Official-site options are not sold in this demo store. Prices as listed on bebodywise.com on 31 Oct 2026 and may change.</p>' : '') + '</div>' : '';
-    return '<section class="card fit" aria-labelledby="fit-h"><div class="fit-top"><h2 id="fit-h">Is it right for you?</h2><a class="srcl" href="' + esc(d.url) + '" target="_blank" rel="noopener">Official product page ↗</a></div>' +
-      '<div class="fit-grid"><div class="fit-yes"><h3>A good fit if</h3>' + list(d.goodFit) + '</div><div class="fit-no"><h3>Think twice if</h3>' + list(d.think) + '</div></div>' +
-      '<div class="fit-facts">' + facts.map(function (f) { return '<div><span>' + f[0] + '</span><p>' + esc(f[1]) + '</p></div>'; }).join('') + '</div>' +
-      '<h3 style="margin:18px 0 8px">What is in it</h3>' + ing + full + alt + '</section>';
+      '</ul>' + (alts.length ? '<p class="muted" style="font-size:.78rem;margin:6px 0 0">Official-site options are not sold in this demo store. Prices as listed on bebodywise.com on 31 Oct 2026; they may change.</p>' : '') + '</details>' : '';
+    return '<section class="guide know" aria-labelledby="gh"><div class="guide-h"><div><h2 id="gh">FitCheck guide</h2><div class="sub">Is it right for you? Know before you start</div></div><a class="src" href="' + esc(d.url) + '" target="_blank" rel="noopener">Official page ↗</a></div>' +
+      '<div class="kn-grid">' +
+      '<div class="kb yes"><h3>A good fit if</h3>' + li(d.goodFit) + '</div>' +
+      '<div class="kb no"><h3>Think twice if</h3>' + li(d.think) + '</div>' +
+      '<div class="kb"><h3>What is in it</h3>' + ing + '</div>' +
+      '<div class="kb"><h3>How to use it</h3>' + steps + '<div class="when"><div class="w brand"><small>Give it</small>' + esc(p.judgeShort) + '</div></div></div>' +
+      '</div>' +
+      '<div class="kfacts">' + facts.map(function (f) { return '<div><span>' + f[0] + '</span><p>' + esc(f[1]) + '</p></div>'; }).join('') + '<div class="warnf"><span>Check first</span><p>' + esc(p.cautionShort) + (d.avoid && d.avoid.indexOf('Patch') !== 0 ? ' ' + esc(d.avoid) : '') + '</p></div></div>' +
+      alt +
+      '<div class="guide-f">From the official product pages and the pack. Where a page did not say, it says so. If your pack differs, follow your pack. General information, not medical advice.</div></section>';
   }
   function stars(avg) { var n = Math.round(avg); return '<span class="stars" aria-hidden="true">' + '★★★★★'.slice(0, n) + '<i>' + '★★★★★'.slice(n) + '</i></span>'; }
   function reviewsSection(p) {
@@ -191,7 +198,7 @@
       '<p class="rv-sum" id="rvSum" data-pid="' + p.id + '"><span class="muted">Reading the reviews…</span></p>' +
       '<ul class="rv-list">' + d.reviews.map(function (r) { return '<li>“' + esc(r.t) + '”<span>' + esc(r.n) + '</span></li>'; }).join('') + '</ul>' +
       (d.reviewNote ? '<p class="muted" style="font-size:.82rem;margin:8px 0 0">' + esc(d.reviewNote) + '</p>' : '') +
-      '<p class="muted" style="font-size:.78rem;margin:8px 0 0">Reviews are copied from the brand’s own product page. The summary line is written by Gemini from the excerpts shown here, not from the whole review list.</p></section>';
+      '<p class="muted" style="font-size:.78rem;margin:8px 0 0">Reviews are copied from the brand’s own product page. The summary is written by Gemini from the excerpts shown here, not from the whole review list.</p></section>';
   }
   function loadReviewSummary() {
     var el = $('#rvSum'); if (!el) return;
@@ -204,18 +211,15 @@
 
   function viewProduct(id) {
     var p = PRODUCTS[id]; if (!p) return viewNotFound();
-    var d = p.checkinDays;
     return '<nav class="crumbs" aria-label="Breadcrumb"><a href="#/">Shop</a> / ' + esc(p.name) + '</nav>' +
       '<div class="pp"><div class="big"><img src="' + p.img + '" alt="' + esc(p.name) + ' pack" width="520" height="520"></div>' +
       '<div class="info"><span class="chip">' + esc(p.tag) + '</span><h1 style="margin-top:10px;font-size:clamp(1.6rem,3.4vw,2.2rem)">' + esc(p.name) + '</h1>' +
       '<p class="muted">' + esc(p.short) + ' · ' + esc(p.size) + '</p><div class="price">' + money(p.price) + '<small>demo price</small></div>' +
       '<div class="buy"><button class="btn" data-add="' + id + '" type="button">Add to cart</button><button class="btn ghost" data-buy="' + id + '" type="button">Buy now</button></div>' +
-      '</div></div>' +
-      fitSection(p) + reviewsSection(p) +
-      '<section class="card xsec">' + expWidget(id) + '</section>' + guideCard(p);
+      expWidget(id) + '</div></div>' +
+      fitSection(p) + reviewsSection(p);
   }
 
-  /* FitCheck is part of every order. It is shown as an included benefit, with no checkbox, so it cannot be removed. */
   function optin() {
     return '<section class="card benefits" aria-labelledby="bnh"><h3 id="bnh">Offers and benefits</h3>' +
       '<div class="bn"><span class="bic">' + IC.check + '</span><div><b>FitCheck</b><span class="tag">FREE</span><span class="lock">Included with every order</span>' +
@@ -272,13 +276,12 @@
       '<div class="journey"><div class="j"><b>Product page</b>Guide and expectations</div><div class="j"><b>Checkout</b>One tick turns it on</div><div class="j"><b>Delivery</b>Order arrives</div><div class="j fc"><b>FitCheck</b>Check-in, honest next step, optional anonymous note</div></div></div>' +
       '<h2 style="margin-top:34px">How FitCheck decides</h2><p class="muted" style="max-width:48em;margin:-4px 0 14px">Every decision follows written rules you can check. AI helps explain, but it never decides for the customer or the team.</p>' +
       '<div class="decide">' +
-      '<div class="card"><h3>For the customer: six fixed outcomes</h3><ul><li><b>Keep going</b>: it is working, so let it carry on.</li><li><b>Wait longer</b>: used as directed, so time is the next step.</li><li><b>Adjust usage</b>: not used as directed, or the directions were unclear.</li><li><b>Consider a swap</b>: feel or smell did not suit. It names a specific product and why.</li><li><b>Value is their call</b>: price only. Nothing to fix.</li><li><b>See a doctor</b>: any skin irritation, every time.</li></ul></div>' +
-      '<div class="card"><h3>For the team: expectation vs experience</h3><ul><li>Needs <b>5 check-ins</b> per product before any decision.</li><li><b>40% or more</b> said less than hoped: <b>Reset the promise</b> if most hoped for results sooner than the pack says; <b>Fix the guidance</b> if unclear instructions are 30% or more of the reasons; otherwise <b>Review the product</b>.</li><li><b>70% or more</b> better or as hoped: <b>Keep it</b>, and use their words.</li><li>Anything else: <b>Keep watching</b>.</li></ul></div>' +
-      '<div class="card"><h3>Where AI is used, and where it is not</h3><ul><li><b>Gemini</b> writes the team summary and explains each expectation gap in plain words, from anonymous totals.</li><li>It <b>never</b> picks a customer verdict, gives medical advice or changes a team decision.</li><li>Verdicts and decisions are fixed rules, so the same answers always give the same result.</li></ul></div>' +
-      '<div class="card"><h3>Safety and data</h3><ul><li>Skin irritation always means <b>stop and see a doctor or pharmacist</b>. FitCheck cannot diagnose.</li><li>Phone numbers are <b>never stored</b>. A conversation is kept under a one-way code for 2 hours, then deleted.</li><li>The team sees only anonymous counts and notes with emails, numbers, links and handles removed.</li><li>Guidance comes from pack and public listing information. Anything not stated is marked as not stated.</li></ul></div>' +
+      '<div class="card dc c1"><h3>For the customer</h3><p class="dsub">Six fixed outcomes</p><ul class="dl"><li><b>Keep going</b><span>It is working, so let it carry on.</span></li><li><b>Wait longer</b><span>Used as directed, so time is the next step.</span></li><li><b>Adjust usage</b><span>Not used as directed, or the directions were unclear.</span></li><li><b>Consider a swap</b><span>Feel or smell did not suit. Names a specific product and why.</span></li><li><b>Value is their call</b><span>Price only. Nothing to fix.</span></li><li><b>See a doctor</b><span>Any skin irritation, every time.</span></li></ul></div>' +
+      '<div class="card dc c2"><h3>For the team</h3><p class="dsub">Expectation vs experience</p><ul class="dl"><li><b>5 check-ins first</b><span>Per product, before any decision is made.</span></li><li><b>40% or more fell short</b><span>Reset the promise if most hoped for results sooner than the pack says. Fix the guidance if unclear instructions are 30% or more of the reasons. Otherwise, review the product.</span></li><li><b>70% or more did well</b><span>Better or as hoped: keep it, and use their words.</span></li><li><b>Anything else</b><span>Keep watching.</span></li></ul></div>' +
+      '<div class="card dc c3"><h3>Where AI fits</h3><p class="dsub">And where it does not</p><ul class="dl"><li><b>Gemini does</b><span>Writes the team summary, explains each expectation gap in plain words, and summarises product reviews.</span></li><li><b>Gemini never</b><span>Picks a customer verdict, gives medical advice or changes a team decision.</span></li><li><b>Same answers, same result</b><span>Verdicts and decisions are fixed rules, so anyone can check them.</span></li></ul></div>' +
       '</div>' +
       '<details class="card team" style="margin-top:22px"><summary><span>What the internal team gets</span></summary><p class="muted" style="margin:12px 0 14px;max-width:44em">Why products disappoint, which products need clearer directions, how what customers hoped for compares with what they got, and what is working, as live anonymous charts.</p><a class="btn fc" href="#/insights">See the Insights dashboard</a></details>' +
-      '<p class="muted" style="font-size:.84rem;margin-top:18px">Privacy: the site never asks for a phone number. Only anonymous counts and redacted notes are kept. Store, cart and payment are simulated; prices are demo prices.</p>';
+      '<p class="muted fnote"><b>Safety and data.</b> Skin irritation always means stop and see a doctor or pharmacist; FitCheck cannot diagnose. Phone numbers are never stored: a conversation is kept under a one-way code for 2 hours, then deleted. The team sees only anonymous counts and notes with emails, numbers, links and handles removed. Guidance comes from the pack and public listing information, and anything not stated is marked as not stated. Store, cart and payment are simulated; prices are demo prices.</p>';
   }
 
   function viewChat(q) {
