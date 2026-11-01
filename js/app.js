@@ -165,6 +165,43 @@
       '</div><div class="guide-f">Compiled from the pack photo and public listing pages. Where a page did not say, it says so and asks you to check your pack. If your pack differs, follow your pack. This is general information, not medical advice.</div></section>';
   }
 
+
+  /* ---------- fit and reviews (details from the official product pages) ---------- */
+  function fitSection(p) {
+    var d = p.detail; if (!d) return '';
+    var list = function (a) { return '<ul>' + a.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>'; };
+    var facts = [['Who it suits', d.skin], ['Scent', d.scent], ['Free of', d.free], ['Check first', d.avoid]].filter(function (f) { return f[1]; });
+    var ing = '<table class="ingt"><thead><tr><th scope="col">Key ingredient</th><th scope="col">What the page says it does</th></tr></thead><tbody>' + d.key.map(function (k) { return '<tr><td>' + esc(k[0]) + '</td><td>' + esc(k[1]) + '</td></tr>'; }).join('') + '</tbody></table>';
+    var full = d.full ? '<details class="fulling"><summary>Full ingredient list</summary><p>' + esc(d.full) + '</p></details>' : '<p class="muted" style="font-size:.86rem;margin:10px 0 0">The official page lists only the key ingredients above, not a full list. Check your pack for the full list.</p>';
+    var alts = (p.swapExt || []).filter(function (e) { return e.name; }), others = (p.swap || []).map(function (id) { return PRODUCTS[id]; });
+    var alt = (others.length || alts.length) ? '<div class="alts"><h3>If it is not the right fit</h3><ul>' +
+      others.map(function (o) { return '<li><a href="#/p/' + o.id + '"><b>' + esc(o.name) + '</b></a> <span class="muted">· ' + esc(o.size) + ' · in this store</span><br><span class="muted">' + esc(p.swapWhy[o.id].en) + '</span></li>'; }).join('') +
+      alts.map(function (e) { return '<li><a href="' + esc(e.url) + '" target="_blank" rel="noopener"><b>' + esc(e.name) + '</b></a> <span class="muted">· ' + esc(e.size) + (e.price !== 'see site' ? ' · ' + esc(e.price) : '') + ' · official site</span><br><span class="muted">' + esc(e.en) + '</span></li>'; }).join('') +
+      '</ul>' + (alts.length ? '<p class="muted" style="font-size:.78rem;margin:8px 0 0">Official-site options are not sold in this demo store. Prices as listed on bebodywise.com on 31 Oct 2026 and may change.</p>' : '') + '</div>' : '';
+    return '<section class="card fit" aria-labelledby="fit-h"><div class="fit-top"><h2 id="fit-h">Is it right for you?</h2><a class="srcl" href="' + esc(d.url) + '" target="_blank" rel="noopener">Official product page ↗</a></div>' +
+      '<div class="fit-grid"><div class="fit-yes"><h3>A good fit if</h3>' + list(d.goodFit) + '</div><div class="fit-no"><h3>Think twice if</h3>' + list(d.think) + '</div></div>' +
+      '<div class="fit-facts">' + facts.map(function (f) { return '<div><span>' + f[0] + '</span><p>' + esc(f[1]) + '</p></div>'; }).join('') + '</div>' +
+      '<h3 style="margin:18px 0 8px">What is in it</h3>' + ing + full + alt + '</section>';
+  }
+  function stars(avg) { var n = Math.round(avg); return '<span class="stars" aria-hidden="true">' + '★★★★★'.slice(0, n) + '<i>' + '★★★★★'.slice(n) + '</i></span>'; }
+  function reviewsSection(p) {
+    var d = p.detail; if (!d) return '';
+    return '<section class="card rv" aria-labelledby="rv-h"><div class="fit-top"><h2 id="rv-h">What customers say</h2><a class="srcl" href="' + esc(d.url) + '" target="_blank" rel="noopener">All reviews on the official page ↗</a></div>' +
+      '<div class="rv-head">' + stars(d.rating.avg) + '<b>' + d.rating.avg + '</b><span class="muted">from ' + d.rating.count.toLocaleString('en-IN') + ' reviews on the official page</span></div>' +
+      '<p class="rv-sum" id="rvSum" data-pid="' + p.id + '"><span class="muted">Reading the reviews…</span></p>' +
+      '<ul class="rv-list">' + d.reviews.map(function (r) { return '<li>“' + esc(r.t) + '”<span>' + esc(r.n) + '</span></li>'; }).join('') + '</ul>' +
+      (d.reviewNote ? '<p class="muted" style="font-size:.82rem;margin:8px 0 0">' + esc(d.reviewNote) + '</p>' : '') +
+      '<p class="muted" style="font-size:.78rem;margin:8px 0 0">Reviews are copied from the brand’s own product page. The summary line is written by Gemini from the excerpts shown here, not from the whole review list.</p></section>';
+  }
+  function loadReviewSummary() {
+    var el = $('#rvSum'); if (!el) return;
+    var pid = el.dataset.pid;
+    var done = function (txt, ai) { var e2 = $('#rvSum'); if (e2 && e2.dataset.pid === pid) e2.innerHTML = txt ? '<span class="aitag">' + (ai ? 'Gemini summary' : 'Summary') + '</span> ' + esc(txt) : ''; };
+    fetch('api/reviews?id=' + encodeURIComponent(pid)).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+      if (j && j.source === 'gemini' && j.summary) done(j.summary, true); else done('', false);
+    }).catch(function () { done('', false); });
+  }
+
   function viewProduct(id) {
     var p = PRODUCTS[id]; if (!p) return viewNotFound();
     var d = p.checkinDays;
@@ -174,11 +211,15 @@
       '<p class="muted">' + esc(p.short) + ' · ' + esc(p.size) + '</p><div class="price">' + money(p.price) + '<small>demo price</small></div>' +
       '<div class="buy"><button class="btn" data-add="' + id + '" type="button">Add to cart</button><button class="btn ghost" data-buy="' + id + '" type="button">Buy now</button></div>' +
       '</div></div>' +
+      fitSection(p) + reviewsSection(p) +
       '<section class="card xsec">' + expWidget(id) + '</section>' + guideCard(p);
   }
 
-  function optin(checked) {
-    return '<label class="optin"><input type="checkbox" id="fcOpt"' + (checked ? ' checked' : '') + '><span><b>Add FitCheck to this order</b><span class="tag">FREE</span><br>A quick guide and a friendly check-in on WhatsApp. We never ask for your number here, and the brand only sees anonymous answers.</span></label>';
+  /* FitCheck is part of every order. It is shown as an included benefit, with no checkbox, so it cannot be removed. */
+  function optin() {
+    return '<section class="card benefits" aria-labelledby="bnh"><h3 id="bnh">Offers and benefits</h3>' +
+      '<div class="bn"><span class="bic">' + IC.check + '</span><div><b>FitCheck</b><span class="tag">FREE</span><span class="lock">Included with every order</span>' +
+      '<p>A quick guide and a friendly check-in on WhatsApp, so you know if the product is working and what to do next. We never ask for your number here, and the brand only sees anonymous answers.</p></div></div></section>';
   }
 
   function viewCart() {
@@ -189,7 +230,7 @@
       var p = PRODUCTS[id];
       return '<div class="line"><a href="#/p/' + id + '"><img src="' + p.img + '" alt="" width="84" height="84"></a><div><a class="nm" href="#/p/' + id + '">' + esc(p.name) + '</a><div class="muted" style="font-size:.86rem">' + esc(p.size) + ' · ' + money(p.price) + '</div><button class="link" data-rm="' + id + '" type="button">Remove</button></div>' +
         '<div class="lt"><div class="qty"><button data-dec="' + id + '" aria-label="Decrease quantity" type="button">−</button><span aria-live="polite">' + c[id] + '</span><button data-inc="' + id + '" aria-label="Increase quantity" type="button">+</button></div></div></div>';
-    }).join('') + optin(memo.fc) + '</div><aside class="sum"><h3 style="margin-top:0">Order summary</h3><div class="r"><span>Subtotal</span><span>' + money(total) + '</span></div><div class="r"><span>Delivery</span><span>Demo: free</span></div><div class="r"><span>FitCheck</span><span id="fcPrice">' + (memo.fc ? 'Included' : 'Not added') + '</span></div><div class="r tot"><span>Total</span><span>' + money(total) + '</span></div>' +
+    }).join('') + optin() + '</div><aside class="sum"><h3 style="margin-top:0">Order summary</h3><div class="r"><span>Subtotal</span><span>' + money(total) + '</span></div><div class="r"><span>Delivery</span><span>Demo: free</span></div><div class="r"><span>FitCheck</span><span id="fcPrice">Included</span></div><div class="r tot"><span>Total</span><span>' + money(total) + '</span></div>' +
       '<a class="btn block" style="margin-top:12px" href="#/checkout">Check out</a><p class="muted" style="font-size:.8rem;margin:10px 0 0">Prices are demo prices. Nothing here is charged.</p></aside></div>';
   }
 
@@ -199,7 +240,7 @@
     var total = ids.reduce(function (n, id) { return n + PRODUCTS[id].price * c[id]; }, 0);
     return '<h1>Checkout</h1><div class="cart-grid"><div><div class="notice"><b>Demo checkout.</b> No name, address, phone number or payment details are collected. Nothing is charged and nothing is shipped.</div>' +
       '<div class="card xsec"><h3 style="margin-top:0">Set your expectations</h3><p class="muted xs">Takes 10 seconds and makes your check-in more useful. Skip it if you like.</p>' + ids.map(function (id) { return expWidget(id, true); }).join('') + '</div>' +
-      optin(memo.fc) +
+      optin() +
       '<div class="card"><h3>What happens after you place the order</h3><ol style="padding-left:1.2em;margin:0"><li>You see your order confirmation.</li><li>If FitCheck is on, you tap <b>Continue on WhatsApp</b>. A message is ready for you to send.</li><li>FitCheck replies with a short guide, then checks in a little later (in real life, after a week or two).</li></ol></div></div>' +
       '<aside class="sum"><h3 style="margin-top:0">Your order</h3>' + ids.map(function (id) { return '<div class="r"><span>' + esc(PRODUCTS[id].name) + ' × ' + c[id] + '</span><span>' + money(PRODUCTS[id].price * c[id]) + '</span></div>'; }).join('') +
       '<div class="r tot"><span>Total</span><span>' + money(total) + '</span></div><button class="btn block" style="margin-top:12px" id="place" type="button">Place demo order</button></aside></div>';
@@ -284,6 +325,7 @@
     window.scrollTo(0, 0); badge();
     if (view === 'home') startCarousel();
     if (view === 'done') drawQr();
+    if (view === 'p') loadReviewSummary();
     if (view === 'insights') window.FitInsights.mount();
     if (view === 'chat') bindChat(q);
   }
@@ -347,11 +389,10 @@
     else if (t.dataset.dec) { c = getCart(); c[t.dataset.dec] = (c[t.dataset.dec] || 1) - 1; if (c[t.dataset.dec] <= 0) delete c[t.dataset.dec]; setCart(c); route(); }
     else if (t.id === 'place') {
       var oids = cartIds().slice(0, 3); t.disabled = true; t.textContent = 'Placing order…';
-      postReceipt(oids).then(function (code) { memo.order = { ids: oids, fc: memo.fc, code: code }; setCart({}); location.hash = '#/done'; });
+      postReceipt(oids).then(function (code) { memo.order = { ids: oids, fc: true, code: code }; setCart({}); location.hash = '#/done'; });
     }
   });
   document.addEventListener('change', function (e) {
-    if (e.target && e.target.id === 'fcOpt') { memo.fc = e.target.checked; var fp = $('#fcPrice'); if (fp) fp.textContent = memo.fc ? 'Included' : 'Not added'; }
   });
   /* If an official product photo cannot load, fall back to the local copy. */
   document.addEventListener('error', function (e) {

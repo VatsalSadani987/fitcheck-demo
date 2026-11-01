@@ -156,7 +156,7 @@
   var timer = null, lastTotal = -1, lastData = null;
 
   function view() {
-    return '<span class="eyebrow"><span class="fcdot"></span>FitCheck Insights</span><h1 style="margin-top:8px">What the Be.Bodywise team would see</h1><span class="muted" style="font-size:.72rem">build 6</span>' +
+    return '<span class="eyebrow"><span class="fcdot"></span>FitCheck Insights</span><h1 style="margin-top:8px">What the Be.Bodywise team would see</h1><span class="muted" style="font-size:.72rem">build 6b</span>' +
       '<p class="muted" style="max-width:48em">Anonymous answers only: no names, no phone numbers. Every WhatsApp or browser check-in updates the Live tab in seconds.</p>' +
       '<div class="ins-bar"><div class="seg" role="tablist"><button class="on" data-seg="live" role="tab" type="button">Live demo sessions</button><button data-seg="sample" role="tab" type="button">Sample data</button></div><span id="segTag"></span><span class="muted" id="stamp" style="font-size:.82rem"></span></div>' +
       '<div id="insBody"></div>';
@@ -190,10 +190,46 @@
     var ai = '<div class="ai" id="aiBox"><span class="tag">' + (sample ? 'What the team would learn' : 'Summary') + '</span><ul>' + summ.map(function (s) { return '<li>' + s + '</li>'; }).join('') + '</ul></div>';
     var notes = '<div class="card" style="margin-top:16px"><h3>Anonymous notes</h3>' + (d.notes && d.notes.length ? d.notes.slice(0, 12).map(function (n) { return '<div class="note">' + esc(n.text) + '<br><small>' + esc((PRODUCTS[n.product] || { name: '' }).name) + (n.tags && n.tags.length ? ' · ' + esc(n.tags.join(', ')) : '') + (n.t ? ' · ' + ago(n.t) : '') + '</small></div>'; }).join('') : '<p class="muted" style="margin:0">No notes yet. Notes appear when a customer chooses to tell the brand and adds a line.</p>') + '</div>';
     var sampleAi = sample ? '<div class="ai" id="aiSample" style="margin-top:14px">' + aiInner(SAMPLE_AI) + '</div>' : '';
-    return warn + kpis + charts + ai + sampleAi + expSection(c, sample) + notes + tableView(c) + tools(!sample);
+    return warn + kpis + charts + ai + sampleAi + expSection(c, sample) + impactSection(c, sample) + notes + tableView(c) + tools(!sample);
   }
 
   /* ---------- Expectation vs experience ---------- */
+
+  /* ---------- "if we fix this" estimate ---------- */
+  var impIn = { buyers: 1000, checkin: 40, rescue: 15, repeats: 2, order: 550 };
+  var inr = function (n) { return '₹' + Math.round(n).toLocaleString('en-IN'); };
+  var f1 = function (n) { return (Math.round(n * 10) / 10).toLocaleString('en-IN'); };
+  function impactOut(c, sample) {
+    var V = window.FitVariance, usedSample = false, src = c;
+    if (V.impact(c, impIn).verdicts < 5) { src = buildSample().counts; usedSample = true; }
+    var r = V.impact(src, impIn);
+    var row = function (lab, f, fmt) { return '<tr><th scope="row">' + lab + '</th><td>' + fmt(r.low[f]) + '</td><td class="b">' + fmt(r.base[f]) + '</td><td>' + fmt(r.high[f]) + '</td></tr>'; };
+    return (usedSample ? '<div class="warnbox" style="margin-bottom:12px">Fewer than 5 check-ins so far, so this uses the invented sample share of fixable check-ins. It will switch to your live numbers once 5 check-ins are in.</div>' : '') +
+      '<p class="imp-line"><b>' + Math.round(100 * r.share) + '%</b> of ' + r.verdicts + ' check-ins ' + (usedSample ? '(sample) ' : '') + 'ended as <i>wait longer</i>, <i>adjust usage</i> or <i>swap</i>. These are customers who could be helped, and who might otherwise quietly leave.</p>' +
+      '<table class="imp-t"><thead><tr><th></th><th scope="col">Cautious</th><th scope="col">Base case</th><th scope="col">Optimistic</th></tr></thead><tbody>' +
+      row('Buyers kept per month', 'rescued', function (x) { return f1(x); }) +
+      row('Repeat-buyer rate, points gained', 'retention', function (x) { return '+' + f1(x); }) +
+      row('NPS, points gained', 'nps', function (x) { return '+' + f1(x); }) +
+      row('Extra repeat revenue per month', 'revenue', inr) + '</tbody></table>';
+  }
+  function impactSection(c, sample) {
+    var fld = function (id, lab, hint, step) { return '<label class="imp-f"><span>' + lab + '</span><input type="number" min="0" step="' + (step || 1) + '" data-imp="' + id + '" value="' + impIn[id] + '" inputmode="decimal"><em>' + hint + '</em></label>'; };
+    return '<div class="sec-h" style="margin-top:28px"><h2 style="margin:0">If we fix this: what it could mean</h2></div>' +
+      '<p class="muted" style="max-width:52em;margin:6px 0 14px">A rough estimate of how many buyers FitCheck could keep, and what that does to repeat purchases and NPS. Only the first number below comes from the check-ins. The five boxes are <b>assumptions you can change</b>, not Be.Bodywise data.</p>' +
+      '<div class="card" id="impBox"><div class="imp-in">' +
+      fld('buyers', 'Buyers per month', 'for the products in FitCheck', 50) + fld('checkin', 'Finish the check-in (%)', 'share who reply', 5) + fld('rescue', 'Kept because of FitCheck (%)', 'of the helpable ones', 1) +
+      fld('repeats', 'Extra orders each', 'per kept buyer', 1) + fld('order', 'Average order (₹)', 'demo store prices', 50) + '</div>' +
+      '<div id="impOut">' + impactOut(c, sample) + '</div>' +
+      '<details class="imp-how"><summary>How it is worked out</summary><p>Buyers kept = buyers × check-in rate × helpable share × kept rate. Repeat-buyer rate and NPS both rise by (buyers kept ÷ buyers) × 100 points: each kept buyer becomes a repeat buyer, and an unhappy buyer moving to neutral counts as +1, a cautious count. Extra revenue = buyers kept × extra orders × average order. Cautious uses half the kept rate; optimistic uses one and a half times. Change the boxes to test your own beliefs. Treat the result as a way to size the idea, and replace the assumptions with real numbers from a pilot.</p></details></div>';
+  }
+  function bindImpact(c, sample) {
+    var box = $('#impBox'); if (!box) return;
+    box.addEventListener('input', function (e) {
+      var id = e.target && e.target.getAttribute && e.target.getAttribute('data-imp'); if (!id) return;
+      impIn[id] = e.target.value; var o = $('#impOut'); if (o) o.innerHTML = impactOut(c, sample);
+    });
+  }
+
   function expSection(c, sample) {
     var V = window.FitVariance, a = V.analyse(c);
     var head = '<div class="sec-h" style="margin-top:28px"><h2 style="margin:0">Expectation vs experience</h2></div>' +
@@ -304,7 +340,7 @@
   function mount() {
     var el = $('#insBody'), tag = $('#segTag'), stamp = $('#stamp'), mode = 'live';
     function paint(d, sample) {
-      lastData = d; el.innerHTML = body(d, sample);
+      lastData = d; el.innerHTML = body(d, sample); try { bindImpact(d.counts || {}, sample); } catch (e) { console.error('impact', e); }
       var b = $('#csvBtn'); if (b) b.onclick = function () {
         var blob = new Blob([csv(d)], { type: 'text/csv' }), a = document.createElement('a');
         a.href = URL.createObjectURL(blob); a.download = 'fitcheck-insights.csv'; document.body.appendChild(a); a.click(); a.remove();
