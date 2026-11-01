@@ -81,17 +81,17 @@ module.exports = async function handler(req, res) {
   if (!p || !p.detail) return res.status(404).json({ source: 'none', reason: 'Unknown product.' });
   const d = p.detail;
   if (!key) return finish({ source: 'rules', reason: 'GEMINI_API_KEY is not set.' });
-  const ck = 'fc:rev:' + id + ':' + JSON.stringify(d.reviews).length;
+  const ck = 'fc:rev2:' + id + ':' + JSON.stringify(d.reviews).length;
   try { const hit = await store.cacheGet(ck); if (hit && !debug) return res.status(200).json(JSON.parse(hit)); } catch (e) { /* ignore */ }
   const prompt = 'You write one short line for a skincare and hair-care shop page, summarising customer reviews. ' +
     'Use ONLY the review excerpts and rating below. Do not add facts, ingredients, results or numbers that are not in them. ' +
     'No medical claims. Say what reviewers mostly praise, in plain friendly words. Because only a few excerpts are shown, write as "Reviewers mention..." and do not say "most" or "all". ' +
-    'If the notes say the reviews are about a kit or combo, say so. Maximum 38 words, 1 or 2 sentences. ' +
+    'If the notes say the reviews are about a kit or combo, say so. Write exactly 2 sentences, 40 to 55 words in total: the first on what reviewers mostly praise, the second on one more detail they mention (for example how long they used it, or the kind of skin or hair). ' +
     'Return JSON only: {"summary": string}.\n\nPRODUCT: ' + p.name + '\nPAGE RATING: ' + d.rating.avg + ' out of 5 from ' + d.rating.count + ' reviews\n' +
     (d.reviewNote ? 'NOTE: ' + d.reviewNote + '\n' : '') + 'REVIEW EXCERPTS:\n' + d.reviews.map((r) => '- ' + r.t).join('\n');
   const g = await ask(prompt);
   if (!g.out || !g.out.summary) return finish({ source: 'rules', reason: 'Gemini did not return an answer.', tried: debug ? g.tried : undefined });
-  const payload = { source: 'gemini', model: g.used, summary: String(g.out.summary).replace(/\s+/g, ' ').trim().slice(0, 300) };
+  const payload = { source: 'gemini', model: g.used, summary: String(g.out.summary).replace(/\s+/g, ' ').trim().slice(0, 420) };
   try { await store.cacheSet(ck, JSON.stringify(payload), 86400); } catch (e) { /* ignore */ }
   return finish(payload);
 };
