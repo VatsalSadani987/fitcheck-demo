@@ -156,7 +156,7 @@
   var timer = null, lastTotal = -1, lastData = null;
 
   function view() {
-    return '<span class="eyebrow"><span class="fcdot"></span>FitCheck Insights</span><h1 style="margin-top:8px">What the Be.Bodywise team would see</h1><span class="muted" style="font-size:.72rem">build 6c</span>' +
+    return '<span class="eyebrow"><span class="fcdot"></span>FitCheck Insights</span><h1 style="margin-top:8px">What the Be.Bodywise team would see</h1><span class="muted" style="font-size:.72rem">build 6g</span>' +
       '<p class="muted" style="max-width:48em">Anonymous answers only: no names, no phone numbers. Every WhatsApp or browser check-in updates the Live tab in seconds.</p>' +
       '<div class="ins-bar"><div class="seg" role="tablist"><button class="on" data-seg="live" role="tab" type="button">Live demo sessions</button><button data-seg="sample" role="tab" type="button">Sample data</button></div><span id="segTag"></span><span class="muted" id="stamp" style="font-size:.82rem"></span></div>' +
       '<div id="insBody"></div>';
@@ -206,11 +206,11 @@
     var row = function (lab, f, fmt) { return '<tr><th scope="row">' + lab + '</th><td>' + fmt(r.low[f]) + '</td><td class="b">' + fmt(r.base[f]) + '</td><td>' + fmt(r.high[f]) + '</td></tr>'; };
     return (usedSample ? '<div class="warnbox" style="margin-bottom:12px">Fewer than 5 check-ins so far, so this uses the invented sample share of fixable check-ins. It will switch to your live numbers once 5 check-ins are in.</div>' : '') +
       '<p class="imp-line"><b>' + Math.round(100 * r.share) + '%</b> of ' + r.verdicts + ' check-ins ' + (usedSample ? '(sample) ' : '') + 'ended as <i>wait longer</i>, <i>adjust usage</i> or <i>swap</i>. These are customers who could be helped, and who might otherwise quietly leave.</p>' +
-      '<table class="imp-t"><thead><tr><th></th><th scope="col">Cautious</th><th scope="col">Base case</th><th scope="col">Optimistic</th></tr></thead><tbody>' +
+      '<div class="tw"><table class="imp-t"><thead><tr><th></th><th scope="col">Cautious</th><th scope="col">Base case</th><th scope="col">Optimistic</th></tr></thead><tbody>' +
       row('Buyers kept per month', 'rescued', function (x) { return f1(x); }) +
       row('Repeat-buyer rate, points gained', 'retention', function (x) { return '+' + f1(x); }) +
       row('NPS, points gained', 'nps', function (x) { return '+' + f1(x); }) +
-      row('Extra repeat revenue per month', 'revenue', inr) + '</tbody></table>';
+      row('Extra repeat revenue per month', 'revenue', inr) + '</tbody></table></div>';
   }
   function impactSection(c, sample) {
     var fld = function (id, lab, hint, step) { return '<label class="imp-f"><span>' + lab + '</span><input type="number" min="0" step="' + (step || 1) + '" data-imp="' + id + '" value="' + impIn[id] + '" inputmode="decimal"><em>' + hint + '</em></label>'; };
