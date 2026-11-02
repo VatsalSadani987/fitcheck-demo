@@ -664,3 +664,20 @@ img,svg,video{max-width:100%}
   .imp-t td.b{border-radius:0}
 }
 @media (max-width:640px){.imp-t td{white-space:nowrap;font-size:.74rem}.imp-t td.b{font-size:.8rem}.imp-t th:first-child{width:31%}}
+/* quick-look panel: matching scrollbar in dark mode, a little tighter so the text fits */
+.pcard .quick{scrollbar-width:thin;scrollbar-color:var(--line) transparent;font-size:.78rem;line-height:1.32}
+:root[data-theme="dark"] .pcard .quick{color-scheme:dark}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .pcard .quick{color-scheme:dark}}
+@media (hover:none){.pcard .qbtn,.pcard .quick{display:none}}
+
+/* product photos: always show the whole pack (never crop or zoom it) */
+.pcard .ph img,.pp .big img,.slide .pics img{object-fit:contain}
+/* quick look: text scales with the card so it fits without a scrollbar */
+.pcard .phw{container-type:inline-size}
+.pcard .quick{font-size:clamp(.58rem,3.55cqw,.8rem);line-height:1.3;padding:clamp(8px,4cqw,14px) clamp(30px,14cqw,46px) clamp(6px,3cqw,12px) clamp(10px,5cqw,16px);scrollbar-width:none}
+.pcard .quick::-webkit-scrollbar{display:none}
+.pcard .qt{font-size:clamp(.72rem,4.6cqw,.95rem);margin-bottom:clamp(2px,1.6cqw,6px)}
+.pcard .qk{font-size:clamp(.54rem,2.9cqw,.66rem)}
+.pcard .quick p{margin:0 0 clamp(2px,1.6cqw,6px)}
+.pcard .quick ul{margin:0 0 clamp(2px,1.6cqw,6px)}
+.pcard .qm{font-size:clamp(.62rem,3.4cqw,.8rem)}
