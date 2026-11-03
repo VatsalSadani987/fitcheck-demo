@@ -83,7 +83,13 @@ async function handle(evt, cfg) {
   const result = Engine.reply(state, { id: inbound.id, text: inbound.text }, c);
   if (result.state) await store.setState(inbound.phone, result.state);
   await store.record(result.events, 'whatsapp');
-  await sendAll(inbound.phone, result.out);
+  // The swap idea queued behind the closing question is only sent if they have not already received it.
+  await sendAll(inbound.phone, result.out, async () => {
+    const s = await store.getState(inbound.phone);
+    if (!s || s.swapSent) return false;
+    s.swapSent = true; await store.setState(inbound.phone, s);
+    return true;
+  });
 }
 
 module.exports = async function handler(req, res) {

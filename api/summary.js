@@ -16,7 +16,7 @@ function compact(stats) {
   P.ORDER.forEach((id) => { perProduct[P.PRODUCTS[id].name] = { started: c['pstart:' + id] || 0 }; });
   return {
     sessions: c.sessions || 0, notes_left: c.notes || 0,
-    how_is_it_going: pick('q1:'), how_used: pick('use:'), reasons_not_as_expected: pick('reason:'), verdicts: pick('verdict:'),
+    how_is_it_going: pick('q1:'), reasons_not_as_expected: pick('reason:'), verdicts: pick('verdict:'),
     products_started: perProduct,
     notes: (stats.notes || []).slice(0, 30).map((n) => ({ product: (P.PRODUCTS[n.product] || {}).name || '', tags: n.tags, text: n.text }))
   };
@@ -115,14 +115,14 @@ module.exports = async function handler(req, res) {
   const xb = expBrief(stats.counts);
   const sig = JSON.stringify([total, (stats.notes || []).length, xb.map((x) => [x.product, x.answered_check_in, x.compared_with_hope, x.DECISION_ALREADY_MADE_BY_RULES])]);
   try {
-    const hit2 = await store.cacheGet('fc:ai3');
+    const hit2 = await store.cacheGet('fc:ai5');
     if (hit2 && !debug) { const o2 = JSON.parse(hit2); if (o2.sig === sig) return res.status(200).json(o2.payload); }
   } catch (e) { /* ignore cache problems */ }
 
   const prompt = 'You are a product analyst for a skincare and wellness brand. Below are ANONYMOUS aggregate results from a post-purchase check-in ("FitCheck"), short customer notes, and an "expectation vs experience" comparison per product. ' +
     'Write ONE short, honest readout for the brand team in three parts. Do not invent numbers or facts that are not in the data. If the sample is small, say so. Do not give medical advice. ' +
     'For the expectation comparison, a fixed rule has ALREADY chosen each decision: explain it, do not change or contradict it. ' +
-    'Return JSON only with this shape: {"expectation": string (part 1: what customers hoped for versus what they got, naming the products that stand out; max 55 words; if there is no expectation data, say so in one short sentence), ' +
+    'Return JSON only with this shape: {"expectation": [{"lead": string (the product name or finding in 2 to 4 words, ending with a colon, e.g. "Hair Growth Serum:"), "detail": string (max 22 words; ONE point only, starting with the key figure or verdict, e.g. "58% said it fell short. They hoped for 2 weeks; the pack says 3 months.")}] (part 1: exactly 3 short bullets in this order: (a) overall hope versus reality with the main figure, (b) the product that fell furthest short and why, (c) the product that met or beat hopes, skipped if none; if there is no expectation data, return one bullet saying so), ' +
     '"headline": string (part 2 headline on the check-in responses, max 18 words), "themes": [{"title": string, "detail": string (max 28 words)}] (part 2: 2 to 3 items on how customers say it is going, reasons and notes), ' +
     '"actions": [string] (part 3: 2 to 3 concrete product or content actions that follow from parts 1 and 2, each max 20 words)}.\n\nCHECK_IN_DATA:\n' + JSON.stringify(compact(stats)) + '\n\nEXPECTATION_VS_EXPERIENCE:\n' + JSON.stringify(xb);
 
@@ -130,9 +130,9 @@ module.exports = async function handler(req, res) {
   g.tried.forEach((t) => tried.push(t));
   if (!out) return finish({ source: 'rules', reason: 'Gemini did not return an answer. See "tried".' });
 
-  const payload = { source: 'gemini', model: used, expectation: String(out.expectation || '').slice(0, 520), headline: String(out.headline || '').slice(0, 200),
+  const payload = { source: 'gemini', model: used, expectation: (Array.isArray(out.expectation) ? out.expectation : [{ lead: '', detail: out.expectation || '' }]).slice(0, 4).map((x) => ({ lead: String((x && x.lead) || '').slice(0, 60), detail: String((x && x.detail) || '').slice(0, 220) })).filter((x) => x.detail), headline: String(out.headline || '').slice(0, 200),
     themes: (out.themes || []).slice(0, 4).map((t) => ({ title: String(t.title || '').slice(0, 80), detail: String(t.detail || '').slice(0, 260) })),
     actions: (out.actions || []).slice(0, 3).map((a) => String(a).slice(0, 200)) };
-  try { await store.cacheSet('fc:ai3', JSON.stringify({ sig, payload }), 600); } catch (e) { /* ignore */ }
+  try { await store.cacheSet('fc:ai5', JSON.stringify({ sig, payload }), 600); } catch (e) { /* ignore */ }
   return finish(payload);
 };
