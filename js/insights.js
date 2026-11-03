@@ -126,7 +126,7 @@
   }
   function funnel(c) {
     var started = sumPrefix(c, 'pstart:'), answered = sumPrefix(c, 'q1:'), verdicts = sumPrefix(c, 'verdict:'), shared = c.shared || 0, notes = c.notes || 0;
-    var steps = [['Check-ins started', started], ['Answered', answered], ['Got a verdict', verdicts], ['Told the brand', shared], ['Left a note', notes]];
+    var steps = [['Check-ins started', started], ['Answered', answered], ['Got a verdict', verdicts], ['Left a note', notes]];
     var max = Math.max(started, 1);
     return '<div class="funnel">' + steps.map(function (s, i) { return '<div class="fr"><span>' + s[0] + '</span><div><div class="fb o' + Math.min(4, i + 1) + '" style="width:' + Math.max(2, Math.round(100 * s[1] / max)) + '%"></div></div><em>' + s[1] + (started ? ' · ' + pct(s[1], started) + '%' : '') + '</em></div>'; }).join('') + '</div>';
   }
@@ -149,7 +149,7 @@
   var timer = null, lastTotal = '', lastData = null;
 
   function view() {
-    return '<span class="eyebrow"><span class="fcdot"></span>FitCheck Insights</span><h1 style="margin-top:8px">What the Be.Bodywise team would see</h1><span class="muted" style="font-size:.72rem">build 7</span>' +
+    return '<span class="eyebrow"><span class="fcdot"></span>FitCheck Insights</span><h1 style="margin-top:8px">What the Be.Bodywise team would see</h1><span class="muted" style="font-size:.72rem">build 8</span>' +
       '<p class="muted" style="max-width:48em">Anonymous answers only: no names, no phone numbers. Every WhatsApp or browser check-in updates the Live tab in seconds.</p>' +
       '<div class="ins-bar"><div class="seg" role="tablist"><button class="on" data-seg="live" role="tab" type="button">Live demo sessions</button><button data-seg="sample" role="tab" type="button">Sample data</button></div><span id="segTag"></span><span class="muted" id="stamp" style="font-size:.82rem"></span></div>' +
       '<div id="insBody"></div>';
@@ -170,7 +170,7 @@
     var kpis = '<div class="kpis"><div class="kpi"><b>' + (c.sessions || 0) + '</b><span>check-in sessions<br>WhatsApp ' + wa + ' · browser ' + web + ((c['lang:hi'] || c['lang:en']) ? '<br>Hinglish ' + (c['lang:hi'] || 0) + ' · English ' + (c['lang:en'] || 0) : '') + '</span></div>' +
       '<div class="kpi"><b>' + pct(c['q1:well'] || 0, answered) + '%</b><span>said it is working well</span></div>' +
       '<div class="kpi"><b>' + pct(low, answered) + '%</b><span>had no change, a mismatch or irritation</span></div>' +
-      '<div class="kpi"><b>' + pct(c.shared || 0, verdicts) + '%</b><span>chose to tell the brand</span></div></div>';
+      '<div class="kpi"><b>' + pct(c.notes || 0, verdicts) + '%</b><span>added a note</span></div></div>';
     var charts = '<div class="chartgrid compact">' +
       '<div class="chart"><h3>How is it going?</h3><div class="sub">Customer answer at the check-in</div>' + donut(q1, 'answers') + '</div>' +
       '<div class="chart"><h3>Verdicts given</h3><div class="sub">Fixed rules, no AI medical advice</div>' + donut(vd, 'verdicts') + '</div>' +
@@ -180,7 +180,8 @@
       '<div class="chart"><h3>Latest activity</h3><div class="sub">Anonymous, newest first</div>' + feedHtml(d.feed, sample) + '</div>' +
       '<div class="chart" style="grid-column:1/-1"><h3>Experience by product</h3><div class="sub">Where each product stands at its check-in</div>' + perProduct(c) + '</div></div>';
     var ai = '<div class="ai" id="aiBox">' + aiInner(sample ? SAMPLE_AI : (lastAi && lastAi.source === 'gemini' ? lastAi : null), c, sample) + '</div>';
-    var notes = '<div class="card" style="margin-top:16px"><h3>Anonymous notes</h3>' + (d.notes && d.notes.length ? d.notes.slice(0, 12).map(function (n) { return '<div class="note">' + esc(n.text) + '<br><small>' + esc((PRODUCTS[n.product] || { name: '' }).name) + (n.tags && n.tags.length ? ' · ' + esc(n.tags.join(', ')) : '') + (n.t ? ' · ' + ago(n.t) : '') + '</small></div>'; }).join('') : '<p class="muted" style="margin:0">No notes yet. Notes appear when a customer chooses to tell the brand and adds a line.</p>') + '</div>';
+    var notesList = d.notes && d.notes.length ? d.notes.slice(0, 12).map(function (n) { return '<div class="note">' + esc(n.text) + '<br><small>' + esc((PRODUCTS[n.product] || { name: '' }).name) + (n.tags && n.tags.length ? ' · ' + esc(n.tags.join(', ')) : '') + (n.t ? ' · ' + ago(n.t) : '') + '</small></div>'; }).join('') : '<p class="muted" style="margin:0">No notes yet. Notes appear when a customer adds a line in their own words.</p>';
+    var notes = '<details class="card notesbox"><summary><h3>Anonymous notes</h3><span class="hint">Click to view</span></summary><div class="nlist">' + notesList + '</div></details>';
     return warn + kpis + charts + expSection(c, sample) + ai + notes + impactSection(c, sample) + tools(!sample);
   }
 
@@ -275,7 +276,7 @@
       Object.keys(g[1]).forEach(function (k) { rows.push([g[0], g[1][k], c[g[2] + ':' + k] || 0]); });
     });
     ORDER.forEach(function (id) { rows.push(['product_checkins_started', PRODUCTS[id].name, c['pstart:' + id] || 0]); });
-    rows.push(['totals', 'sessions', c.sessions || 0], ['totals', 'told_the_brand', c.shared || 0]);
+    rows.push(['totals', 'sessions', c.sessions || 0], ['totals', 'notes', c.notes || 0]);
     if (window.FitVariance) window.FitVariance.analyse(c).products.forEach(function (r) {
       var nm = PRODUCTS[r.id].name;
       rows.push(['expectation_receipts', nm, r.receipts], ['expectation_better_than_hoped', nm, r.hope.better], ['expectation_as_hoped', nm, r.hope.as], ['expectation_less_than_hoped', nm, r.hope.less], ['expectation_decision', nm + ': ' + r.title, r.answered]);

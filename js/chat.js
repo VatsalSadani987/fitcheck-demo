@@ -34,8 +34,19 @@
       skipbar.hidden = true;
     }
 
+    /* A "late" message (the swap idea) is sent later on its own, without holding up the chat. */
+    function later(m) {
+      setTimeout(async function () {
+        if (root.__token !== token) return;
+        var t = typing(); await sleep(600); t.remove();
+        bubble('in', fmt(m.body));
+      }, m.delay || 30000);
+    }
+
     async function play(list) {
       busy = true;
+      list.filter(function (m) { return m.late; }).forEach(later);
+      list = list.filter(function (m) { return !m.late; });
       for (var i = 0; i < list.length; i++) {
         if (root.__token !== token) return;
         var m = list[i];

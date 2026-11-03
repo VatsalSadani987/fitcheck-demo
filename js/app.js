@@ -64,7 +64,7 @@
     var p = PRODUCTS[id], e = getExp()[id] || { o: [], t: '' };
     var gap = e.t ? P.timeGap(id, e.t) : '';
     return '<div class="xw" data-xw="' + id + '"' + (compact ? ' data-compact="1"' : '') + '><div class="xh"><span class="ic">' + IC.target + '</span><b>Your expectation receipt</b><span class="tag">OPTIONAL</span></div>' +
-      '<p class="muted xs">' + (compact ? esc(p.nick) + ': ' : '') + 'What are you hoping this does for you? Pick up to 3. We remember it on this device and compare it with how things actually go.</p>' +
+      '<p class="muted xs">' + (compact ? esc(p.nick) + ': ' : '') + 'What do you hope it does? Pick up to 3.</p>' +
       '<div class="chips" role="group" aria-label="What you hope for">' + p.expect.map(function (o) { var on = e.o.indexOf(o.id) >= 0; return '<button type="button" class="xc' + (on ? ' on' : '') + '" data-xo="' + id + ':' + o.id + '" aria-pressed="' + on + '">' + esc(o.en) + '</button>'; }).join('') + '</div>' +
       '<p class="xl">When do you expect to notice a change?</p>' +
       '<div class="chips" role="group" aria-label="When you expect a change">' + TIMES.map(function (t) { var on = e.t === t.id; return '<button type="button" class="xc' + (on ? ' on' : '') + '" data-xt="' + id + ':' + t.id + '" aria-pressed="' + on + '">' + esc(t.en) + '</button>'; }).join('') + '</div>' +
@@ -167,38 +167,38 @@
 
 
   /* ---------- fit and reviews (details from the official product pages) ---------- */
+  /* One-line suitability summary shown under the product name. */
+  var SUIT = {
+    sa1: 'For mild body acne and bumpy skin. All skin types; sensitive skin should patch test.',
+    aha5: 'For rough, tanned or dull body skin. All skin types; patch test first.',
+    roll: 'For underarm odour and darkness. All skin types; patch test first.',
+    lotion: 'For mild to moderate dry skin.',
+    gum: 'Daily hair supplement for women over 18. Not for skin.',
+    serum: 'Scalp serum for women over 18 with hair fall or thinning.'
+  };
   function fitSection(p) {
     var d = p.detail; if (!d) return '';
-    var li = function (a) { return '<ul>' + a.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>'; };
-    var ing = '<ul class="ing">' + d.key.map(function (k) { return '<li><b>' + esc(k[0]) + '</b><span>' + esc(k[1]) + '</span></li>'; }).join('') + '</ul>' +
-      (d.full ? '<details class="fulling"><summary>Full ingredient list</summary><p>' + esc(d.full) + '</p></details>' : '<p class="muted" style="font-size:.82rem;margin:8px 0 0">The official page shows only the key ingredients. Check your pack for the full list.</p>');
-    var steps = '<ol class="mini">' + p.how.slice(0, 3).map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ol>';
-    var facts = [['Suits', d.skin], ['Scent', d.scent], ['Free of', d.free]].filter(function (f) { return f[1]; });
-    var alts = (p.swapExt || []).filter(function (e) { return e.name; }), others = (p.swap || []).map(function (id) { return PRODUCTS[id]; });
-    var alt = (others.length || alts.length) ? '<details class="alts"><summary>If it is not the right fit</summary><ul>' +
-      others.map(function (o) { return '<li><a href="#/p/' + o.id + '"><b>' + esc(o.name) + '</b></a> <span class="muted">· ' + esc(o.size) + ' · in this store</span><br><span class="muted">' + esc(p.swapWhy[o.id].en) + '</span></li>'; }).join('') +
-      alts.map(function (e) { return '<li><a href="' + esc(e.url) + '" target="_blank" rel="noopener"><b>' + esc(e.name) + '</b></a> <span class="muted">· ' + esc(e.size) + (e.price !== 'see site' ? ' · ' + esc(e.price) : '') + ' · official site</span><br><span class="muted">' + esc(e.en) + '</span></li>'; }).join('') +
-      '</ul>' + (alts.length ? '<p class="muted" style="font-size:.78rem;margin:6px 0 0">Official-site options are not sold in this demo store. Prices as listed on bebodywise.com on 31 Oct 2026; they may change.</p>' : '') + '</details>' : '';
-    return '<section class="guide know" aria-labelledby="gh"><div class="guide-h"><div><h2 id="gh">FitCheck guide</h2><div class="sub">Is it right for you? Know before you start</div></div><a class="src" href="' + esc(d.url) + '" target="_blank" rel="noopener">Official page ↗</a></div>' +
+    var li = function (a) { return '<ul>' + a.map(function (x) { return '<li>' + esc(x.replace(/\s*\((the page|see the|the brand)[^)]*\)/i, '')) + '</li>'; }).join('') + '</ul>'; };
+    var ing = '<p class="ingn">' + d.key.map(function (k) { return esc(k[0]); }).join(' · ') + '</p>' +
+      (d.full ? '<details class="fulling"><summary>Full ingredient list</summary><p>' + esc(d.full) + '</p></details>' : '');
+    var give = p.stated ? 'Give it ' + p.stated.en + '.' : '';
+    return '<section class="guide know" aria-labelledby="gh"><div class="guide-h"><div><h2 id="gh">FitCheck guide</h2></div></div>' +
       '<div class="kn-grid">' +
       '<div class="kb yes"><h3>A good fit if</h3>' + li(d.goodFit) + '</div>' +
       '<div class="kb no"><h3>Think twice if</h3>' + li(d.think) + '</div>' +
-      '<div class="kb"><h3>What is in it</h3>' + ing + '</div>' +
-      '<div class="kb"><h3>How to use it</h3>' + steps + '<div class="when"><div class="w brand"><small>Give it</small>' + esc(p.judgeShort) + '</div></div></div>' +
-      '</div>' +
-      '<div class="kfacts">' + facts.map(function (f) { return '<div><span>' + f[0] + '</span><p>' + esc(f[1]) + '</p></div>'; }).join('') + '<div class="warnf"><span>Check first</span><p>' + esc(p.cautionShort) + (d.avoid && d.avoid.indexOf('Patch') !== 0 ? ' ' + esc(d.avoid) : '') + '</p></div></div>' +
-      alt +
-      '<div class="guide-f">From the official product pages and the pack. Where a page did not say, it says so. If your pack differs, follow your pack. General information, not medical advice.</div></section>';
+      '<div class="kb"><h3>Key ingredients</h3>' + ing + '</div>' +
+      '<div class="kb"><h3>How to use it</h3><p class="howl">' + esc(p.how[0]) + '</p><p class="howl"><b>' + esc(give) + '</b> ' + esc(p.cautionShort) + '</p></div>' +
+      '</div></section>';
   }
   function stars(avg) { var n = Math.round(avg); return '<span class="stars" aria-hidden="true">' + '★★★★★'.slice(0, n) + '<i>' + '★★★★★'.slice(n) + '</i></span>'; }
   function reviewsSection(p) {
     var d = p.detail; if (!d) return '';
-    return '<section class="card rv" aria-labelledby="rv-h"><div class="fit-top"><h2 id="rv-h">What customers say</h2><a class="srcl" href="' + esc(d.url) + '" target="_blank" rel="noopener">All reviews on the official page ↗</a></div>' +
-      '<div class="rv-head">' + stars(d.rating.avg) + '<b>' + d.rating.avg + '</b><span class="muted">from ' + d.rating.count.toLocaleString('en-IN') + ' reviews on the official page</span></div>' +
+    return '<section class="card rv" aria-labelledby="rv-h"><div class="fit-top"><h2 id="rv-h">Customer Reviews</h2></div>' +
+      '<div class="rv-head">' + stars(d.rating.avg) + '<b>' + d.rating.avg + '</b><span class="muted">from ' + d.rating.count.toLocaleString('en-IN') + ' reviews</span></div>' +
       '<p class="rv-sum" id="rvSum" data-pid="' + p.id + '"><span class="muted">Reading the reviews…</span></p>' +
       '<ul class="rv-list">' + d.reviews.map(function (r) { return '<li>“' + esc(r.t) + '”<span>' + esc(r.n) + '</span></li>'; }).join('') + '</ul>' +
       (d.reviewNote ? '<p class="muted" style="font-size:.82rem;margin:8px 0 0">' + esc(d.reviewNote) + '</p>' : '') +
-      '<p class="muted" style="font-size:.78rem;margin:8px 0 0">Reviews are copied from the brand’s own product page. The summary is written by Gemini from the excerpts shown here, not from the whole review list.</p></section>';
+      '<p class="muted" style="font-size:.78rem;margin:8px 0 0">The summary is written by Gemini from the excerpts shown here.</p></section>';
   }
   function loadReviewSummary() {
     var el = $('#rvSum'); if (!el) return;
@@ -214,7 +214,7 @@
     return '<nav class="crumbs" aria-label="Breadcrumb"><a href="#/">Shop</a> / ' + esc(p.name) + '</nav>' +
       '<div class="pp"><div class="big"><img src="' + p.img + '" alt="' + esc(p.name) + ' pack" width="520" height="520"></div>' +
       '<div class="info"><span class="chip">' + esc(p.tag) + '</span><h1 style="margin-top:10px;font-size:clamp(1.6rem,3.4vw,2.2rem)">' + esc(p.name) + '</h1>' +
-      '<p class="muted">' + esc(p.short) + ' · ' + esc(p.size) + '</p><div class="price">' + money(p.price) + '<small>demo price</small></div>' +
+      '<p class="muted">' + esc(p.short) + ' · ' + esc(p.size) + '</p>' + (SUIT[id] ? '<p class="suit">' + esc(SUIT[id]) + '</p>' : '') + '<div class="price">' + money(p.price) + '<small>demo price</small></div>' +
       '<div class="buy"><button class="btn" data-add="' + id + '" type="button">Add to cart</button><button class="btn ghost" data-buy="' + id + '" type="button">Buy now</button></div>' +
       expWidget(id) + '</div></div>' +
       fitSection(p) + reviewsSection(p);
