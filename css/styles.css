@@ -735,13 +735,13 @@ img,svg,video{max-width:100%}
 .pp .big{display:flex;align-items:center;justify-content:center}
 .pp .info{display:flex;flex-direction:column}
 .pp .info .suit{margin:2px 0 6px;font-size:.9rem;color:var(--ink)}
-.pp .info .xw{margin:auto 0 0;padding:9px 12px;border-radius:12px}
-.pp .info .xw .xh b{font-size:.8rem}
+.pp .info .xw{margin:0;flex:1;display:flex;flex-direction:column;justify-content:space-between;padding:14px 16px;border-radius:14px}
+.pp .info .xw .xh b{font-size:.92rem}
 .pp .info .xw .xh .tag{font-size:.58rem;padding:1px 7px}
-.pp .info .xw .xs{font-size:.76rem;margin:3px 0 6px}
-.pp .info .xw .xl{font-size:.76rem;margin:8px 0 5px}
-.pp .info .xw .chips{gap:5px}
-.pp .info .xw .xc{font-size:.72rem;padding:4px 10px}
+.pp .info .xw .xs{font-size:.84rem;margin:6px 0 10px}
+.pp .info .xw .xl{font-size:.84rem;margin:12px 0 8px}
+.pp .info .xw .chips{gap:8px}
+.pp .info .xw .xc{font-size:.8rem;padding:6px 12px}
 .pp .info .xw .xnote{font-size:.74rem;padding:5px 9px;margin-top:8px}
 .pp .info .buy{margin:14px 0}
 .know .kb{padding:12px 20px}
@@ -763,3 +763,5 @@ img,svg,video{max-width:100%}
 .notesbox[open] summary::after{transform:rotate(180deg)}
 .notesbox[open] summary .hint{visibility:hidden}
 .notesbox .nlist{margin-top:12px}
+
+.know .kb ul.ing li{margin:0 0 6px}.know .kb ul.ing span{display:block}.know .mini{margin:0 0 6px;padding-left:1.2em}.know .mini li{font-size:.88rem;margin:3px 0}
