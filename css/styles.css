@@ -729,3 +729,37 @@ img,svg,video{max-width:100%}
 .ai3 li{margin-bottom:.4em}
 .aifoot{font-size:.78rem;margin:14px 0 0}
 @media (max-width:1000px){.ai3{grid-template-columns:1fr}}
+
+/* ---------- v12: compact product page ---------- */
+.pp{align-items:stretch}
+.pp .big{display:flex;align-items:center;justify-content:center}
+.pp .info{display:flex;flex-direction:column}
+.pp .info .suit{margin:2px 0 6px;font-size:.9rem;color:var(--ink)}
+.pp .info .xw{margin:auto 0 0;padding:9px 12px;border-radius:12px}
+.pp .info .xw .xh b{font-size:.8rem}
+.pp .info .xw .xh .tag{font-size:.58rem;padding:1px 7px}
+.pp .info .xw .xs{font-size:.76rem;margin:3px 0 6px}
+.pp .info .xw .xl{font-size:.76rem;margin:8px 0 5px}
+.pp .info .xw .chips{gap:5px}
+.pp .info .xw .xc{font-size:.72rem;padding:4px 10px}
+.pp .info .xw .xnote{font-size:.74rem;padding:5px 9px;margin-top:8px}
+.pp .info .buy{margin:14px 0}
+.know .kb{padding:12px 20px}
+.know .kb h3{font-size:.92rem;margin-bottom:5px}
+.know .kb li,.know .howl{font-size:.88rem}
+.know .howl{margin:0 0 4px}
+.know .ingn{margin:0 0 4px;font-size:.88rem}
+.know .fulling summary{cursor:pointer;font-size:.8rem;color:var(--brand)}
+.know .guide-h{padding:12px 20px}
+.know .guide-h h2{font-size:1.1rem}
+.know{margin-top:20px}
+/* anonymous notes: collapsible */
+.notesbox{margin-top:16px}
+.notesbox summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:10px}
+.notesbox summary::-webkit-details-marker{display:none}
+.notesbox summary h3{margin:0}
+.notesbox summary .hint{margin-left:auto;font-size:.82rem;color:var(--muted)}
+.notesbox summary::after{content:'▾';color:var(--muted);transition:transform .15s}
+.notesbox[open] summary::after{transform:rotate(180deg)}
+.notesbox[open] summary .hint{visibility:hidden}
+.notesbox .nlist{margin-top:12px}
