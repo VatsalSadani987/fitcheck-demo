@@ -8,8 +8,7 @@
   var L = {
     q1: { well: 'Working well', none: 'No change yet', notexp: 'Not what I expected', irr: 'Skin irritation', little: 'Haven’t used much' },
     verdict: { keep: 'Keep going', wait: 'Wait longer', usage: 'Adjust usage', swap: 'Consider a swap', value: 'Value is their call', doctor: 'See a doctor' },
-    reason: { results: 'No visible results', feel: 'Feel or texture', smell: 'Smell', price: 'Price or value', instr: 'Instructions unclear', other: 'Something else' },
-    use: { less: 'Less than directed', asdir: 'As directed', unsure: 'Not sure how' }
+    reason: { results: 'No visible results', feel: 'Feel or texture', smell: 'Smell', taste: 'Taste', price: 'Price or value', instr: 'Instructions unclear', other: 'Something else' }
   };
   var SLOT = ['var(--s1)', 'var(--s2)', 'var(--s3)', 'var(--s4)', 'var(--s5)', 'var(--s6)', 'var(--s7)', 'var(--s8)'];
 
@@ -38,7 +37,6 @@
     var rs = [['results', .30], ['feel', .26], ['smell', .12], ['price', .14], ['instr', .26], ['other', .06]];
     rs.forEach(function (r) { c['reason:' + r[0]] = Math.round(notexp * r[1] * 1.3); });
     var low = (c['q1:none'] || 0) + notexp;
-    c['use:asdir'] = Math.round(low * .5); c['use:less'] = Math.round(low * .3); c['use:unsure'] = low - c['use:asdir'] - c['use:less'];
     var vt = 0; Object.keys(L.verdict).forEach(function (k) { vt += c['verdict:' + k] || 0; });
     c.shared = Math.round(vt * .46); c.notes = 4; c.done = Math.round(vt * .8);
     /* Expectation receipts (invented). One product per decision, so every outcome shows. */
@@ -76,7 +74,11 @@
   /* Example of what the Gemini readout looks like. Written by hand to match the invented sample numbers; NOT generated live. */
   var SAMPLE_AI = { source: 'gemini', sample: true,
     headline: 'Unclear directions and mismatched timing, more than the products themselves, drive most disappointment.',
-    expectation: 'The 5% AHA BHA wash is judged too early: most customers expected change within 2 weeks, but the page says 3 to 4 months. The serum falls short mostly on unclear directions, while the 1% salicylic wash meets or beats what customers hoped for.',
+    expectation: [
+      { lead: '5% AHA BHA wash:', detail: 'judged too early. Most expected change within 2 weeks, but it needs 3 to 4 months.' },
+      { lead: 'Hair Growth Serum:', detail: 'falls short mostly because directions are unclear.' },
+      { lead: '1% salicylic wash:', detail: 'meets or beats what customers hoped for.' }
+    ],
     themes: [
       { title: 'Timing expectations', detail: 'Most 5% AHA BHA wash customers expected results within 2 weeks. The brand page says 3 to 4 months, and 58% said it fell short of their hope.' },
       { title: 'Unclear directions', detail: 'Half of the reasons given for the Hair Growth Serum were unclear instructions on how much and how often to use it.' },
@@ -139,8 +141,6 @@
     out.push('<b>' + pct(well, answered) + '%</b> said the product is working well. <b>' + pct(low, answered) + '%</b> had no change, a mismatch or irritation: that is the group a brand rarely hears from.');
     var rkeys = Object.keys(L.reason).sort(function (a, b) { return (c['reason:' + b] || 0) - (c['reason:' + a] || 0); });
     if (c['reason:' + rkeys[0]]) out.push('Top reason a product felt wrong: <b>' + esc(L.reason[rkeys[0]]) + '</b> (' + c['reason:' + rkeys[0]] + ' mentions). Customers can name more than one reason.');
-    var us = c['verdict:usage'] || 0;
-    if (verdicts) out.push('<b>' + pct(us, verdicts) + '%</b> of verdicts were about how the product is used, so clearer directions could prevent some disappointment before the customer leaves.');
     if (answered < 20) out.push('Small sample (' + answered + ' answered check-ins). Treat this as an illustration, not evidence.');
     return out;
   }
@@ -149,7 +149,7 @@
   var timer = null, lastTotal = '', lastData = null;
 
   function view() {
-    return '<span class="eyebrow"><span class="fcdot"></span>FitCheck Insights</span><h1 style="margin-top:8px">What the Be.Bodywise team would see</h1><span class="muted" style="font-size:.72rem">build 8</span>' +
+    return '<span class="eyebrow"><span class="fcdot"></span>FitCheck Insights</span><h1 style="margin-top:8px">What the Be.Bodywise team would see</h1><span class="muted" style="font-size:.72rem">build 10</span>' +
       '<p class="muted" style="max-width:48em">Anonymous answers only: no names, no phone numbers. Every WhatsApp or browser check-in updates the Live tab in seconds.</p>' +
       '<div class="ins-bar"><div class="seg" role="tablist"><button class="on" data-seg="live" role="tab" type="button">Live demo sessions</button><button data-seg="sample" role="tab" type="button">Sample data</button></div><span id="segTag"></span><span class="muted" id="stamp" style="font-size:.82rem"></span></div>' +
       '<div id="insBody"></div>';
@@ -165,7 +165,7 @@
     }
     var low = (c['q1:none'] || 0) + (c['q1:notexp'] || 0) + (c['q1:irr'] || 0), verdicts = sumPrefix(c, 'verdict:');
     var wa = c['src:whatsapp'] || 0, web = c['src:web'] || 0;
-    var q1 = series(L.q1, c, 'q1'), vd = series(L.verdict, c, 'verdict'), us = series(L.use, c, 'use');
+    var q1 = series(L.q1, c, 'q1'), vd = series(L.verdict, c, 'verdict');
     var rs = Object.keys(L.reason).map(function (k) { return { label: L.reason[k], value: c['reason:' + k] || 0 }; }).sort(function (a, b) { return b.value - a.value; });
     var kpis = '<div class="kpis"><div class="kpi"><b>' + (c.sessions || 0) + '</b><span>check-in sessions<br>WhatsApp ' + wa + ' · browser ' + web + ((c['lang:hi'] || c['lang:en']) ? '<br>Hinglish ' + (c['lang:hi'] || 0) + ' · English ' + (c['lang:en'] || 0) : '') + '</span></div>' +
       '<div class="kpi"><b>' + pct(c['q1:well'] || 0, answered) + '%</b><span>said it is working well</span></div>' +
@@ -174,7 +174,6 @@
     var charts = '<div class="chartgrid compact">' +
       '<div class="chart"><h3>How is it going?</h3><div class="sub">Customer answer at the check-in</div>' + donut(q1, 'answers') + '</div>' +
       '<div class="chart"><h3>Verdicts given</h3><div class="sub">Fixed rules, no AI medical advice</div>' + donut(vd, 'verdicts') + '</div>' +
-      '<div class="chart"><h3>How they were using it</h3><div class="sub">Asked when results were missing</div>' + donut(us, 'answers') + '</div>' +
       '<div class="chart"><h3>What felt wrong</h3><div class="sub">Up to three reasons each</div>' + hbars(rs, 'var(--s1)') + '</div>' +
       '<div class="chart"><h3>From check-in to feedback</h3><div class="sub">Each product check-in is one unit</div>' + funnel(c) + '</div>' +
       '<div class="chart"><h3>Latest activity</h3><div class="sub">Anonymous, newest first</div>' + feedHtml(d.feed, sample) + '</div>' +
@@ -272,7 +271,7 @@
 
   function csv(d) {
     var rows = [['group', 'item', 'count']], c = d.counts || {};
-    [['how_is_it_going', L.q1, 'q1'], ['verdict', L.verdict, 'verdict'], ['reason', L.reason, 'reason'], ['usage', L.use, 'use']].forEach(function (g) {
+    [['how_is_it_going', L.q1, 'q1'], ['verdict', L.verdict, 'verdict'], ['reason', L.reason, 'reason']].forEach(function (g) {
       Object.keys(g[1]).forEach(function (k) { rows.push([g[0], g[1][k], c[g[2] + ':' + k] || 0]); });
     });
     ORDER.forEach(function (id) { rows.push(['product_checkins_started', PRODUCTS[id].name, c['pstart:' + id] || 0]); });
@@ -296,13 +295,19 @@
       if (r.answered > 0) lines.push('<b>' + esc(PRODUCTS[r.id].nick) + '</b>: ' + esc(r.title.toLowerCase()));
       if (r.answered >= V.MIN_ANSWERS && r.decision !== 'monitor' && r.decision !== 'keep' && r.action) acts.push(PRODUCTS[r.id].nick + ': ' + r.action);
     });
-    var text = !a.answered ? 'Nobody has compared what they hoped for with what they got yet.' :
-      Math.round(100 * a.lessShare) + '% of ' + a.answered + ' customers said it fell short of their hope. By product: ' + lines.join('; ') + '.';
+    var text = !a.answered ? '<ul><li>Nobody has compared what they hoped for with what they got yet.</li></ul>' :
+      '<ul><li><b>' + Math.round(100 * a.lessShare) + '% fell short.</b> Of ' + a.answered + ' customers who compared, this share said it was less than they hoped.</li>' + lines.map(function (l) { return '<li>' + l + '</li>'; }).join('') + '</ul>';
     return { text: text, acts: acts.slice(0, 3) };
   }
+  /* bold the figures (58%, 2 weeks, 3 to 4 months) so the key numbers stand out */
+  function boldNums(h) { return h.replace(/(\d+(?:\.\d+)?\s?%|\d+(?:\s?(?:to|-)\s?\d+)?\s?(?:weeks?|months?|days?))/g, '<b>$1</b>'); }
   function aiInner(s, c, sample) {
     var gem = s && s.source === 'gemini', rx = ruleX(c);
-    var p1 = gem && s.expectation ? esc(s.expectation) : rx.text;
+    var p1 = rx.text;
+    if (gem && s.expectation) {
+      var ex = Array.isArray(s.expectation) ? s.expectation : [{ lead: '', detail: String(s.expectation) }];
+      p1 = '<ul>' + ex.map(function (x) { return '<li>' + (x.lead ? '<b>' + esc(x.lead) + '</b> ' : '') + boldNums(esc(x.detail)) + '</li>'; }).join('') + '</ul>';
+    }
     var rules = ruleSummary(c);
     var p2 = gem ? '<p class="aih">' + esc(s.headline) + '</p><ul>' + (s.themes || []).map(function (t) { return '<li><b>' + esc(t.title) + ':</b> ' + esc(t.detail) + '</li>'; }).join('') + '</ul>'
       : '<ul>' + rules.map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ul>';
@@ -310,7 +315,7 @@
     var foot = sample ? 'Example text written by hand to match the invented sample numbers. The live tab shows what Gemini writes from real check-ins.'
       : (gem ? 'Written by an AI model from the anonymous numbers and notes on this page. Check against the data before acting.' : 'Rule-based summary from the numbers on this page. Gemini’s version replaces it when available.');
     return '<span class="tag">' + (sample ? 'SAMPLE · Gemini readout' : (gem ? 'AI summary · Gemini' : 'Summary')) + '</span>' + (sample ? '<span class="samplebadge">Illustrative text, not generated live</span>' : '') +
-      '<div class="ai3"><section><h4><i>1</i>Expectation vs experience</h4><p>' + p1 + '</p></section>' +
+      '<div class="ai3"><section><h4><i>1</i>Expectation vs experience</h4>' + p1 + '</section>' +
       '<section><h4><i>2</i>FitCheck responses</h4>' + p2 + '</section>' +
       '<section><h4><i>3</i>Suggested actions</h4><ul>' + acts.map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ul></section></div>' +
       '<p class="muted aifoot">' + foot + '</p>';

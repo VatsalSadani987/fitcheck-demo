@@ -179,21 +179,22 @@
   function fitSection(p) {
     var d = p.detail; if (!d) return '';
     var li = function (a) { return '<ul>' + a.map(function (x) { return '<li>' + esc(x.replace(/\s*\((the page|see the|the brand)[^)]*\)/i, '')) + '</li>'; }).join('') + '</ul>'; };
-    var ing = '<p class="ingn">' + d.key.map(function (k) { return esc(k[0]); }).join(' · ') + '</p>' +
+    var ing = '<ul class="ing">' + d.key.slice(0, 5).map(function (k) { return '<li><b>' + esc(k[0]) + '</b><span>' + esc(k[1]) + '</span></li>'; }).join('') + '</ul>' +
       (d.full ? '<details class="fulling"><summary>Full ingredient list</summary><p>' + esc(d.full) + '</p></details>' : '');
+    var steps = '<ol class="mini">' + p.how.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ol>';
     var give = p.stated ? 'Give it ' + p.stated.en + '.' : '';
     return '<section class="guide know" aria-labelledby="gh"><div class="guide-h"><div><h2 id="gh">FitCheck guide</h2></div></div>' +
       '<div class="kn-grid">' +
       '<div class="kb yes"><h3>A good fit if</h3>' + li(d.goodFit) + '</div>' +
       '<div class="kb no"><h3>Think twice if</h3>' + li(d.think) + '</div>' +
-      '<div class="kb"><h3>Key ingredients</h3>' + ing + '</div>' +
-      '<div class="kb"><h3>How to use it</h3><p class="howl">' + esc(p.how[0]) + '</p><p class="howl"><b>' + esc(give) + '</b> ' + esc(p.cautionShort) + '</p></div>' +
+      '<div class="kb"><h3>What is in it</h3>' + ing + '</div>' +
+      '<div class="kb"><h3>How to use it</h3>' + steps + '<p class="howl"><b>' + esc(give) + '</b> ' + esc(p.cautionShort) + '</p></div>' +
       '</div></section>';
   }
   function stars(avg) { var n = Math.round(avg); return '<span class="stars" aria-hidden="true">' + '★★★★★'.slice(0, n) + '<i>' + '★★★★★'.slice(n) + '</i></span>'; }
   function reviewsSection(p) {
     var d = p.detail; if (!d) return '';
-    return '<section class="card rv" aria-labelledby="rv-h"><div class="fit-top"><h2 id="rv-h">Customer Reviews</h2></div>' +
+    return '<section class="card rv" aria-labelledby="rv-h"><div class="fit-top"><h2 id="rv-h">Customer Reviews</h2><a class="srcl" href="' + esc(d.url) + '" target="_blank" rel="noopener">All reviews on the official page ↗</a></div>' +
       '<div class="rv-head">' + stars(d.rating.avg) + '<b>' + d.rating.avg + '</b><span class="muted">from ' + d.rating.count.toLocaleString('en-IN') + ' reviews</span></div>' +
       '<p class="rv-sum" id="rvSum" data-pid="' + p.id + '"><span class="muted">Reading the reviews…</span></p>' +
       '<ul class="rv-list">' + d.reviews.map(function (r) { return '<li>“' + esc(r.t) + '”<span>' + esc(r.n) + '</span></li>'; }).join('') + '</ul>' +

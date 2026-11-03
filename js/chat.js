@@ -38,6 +38,7 @@
     function later(m) {
       setTimeout(async function () {
         if (root.__token !== token) return;
+        if (m.pending) { if (state && state.swapSent) return; if (state) state.swapSent = true; }
         var t = typing(); await sleep(600); t.remove();
         bubble('in', fmt(m.body));
       }, m.delay || 30000);
