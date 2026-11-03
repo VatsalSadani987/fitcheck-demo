@@ -681,3 +681,51 @@ img,svg,video{max-width:100%}
 .pcard .quick p{margin:0 0 clamp(2px,1.6cqw,6px)}
 .pcard .quick ul{margin:0 0 clamp(2px,1.6cqw,6px)}
 .pcard .qm{font-size:clamp(.62rem,3.4cqw,.8rem)}
+
+/* ============ Insights revamp: compact dashboard ============ */
+.kpis{gap:10px;margin-bottom:12px}
+.kpi{padding:12px 14px}
+.kpi b{font-size:1.7rem}
+.chartgrid.compact{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.chartgrid.compact .chart{padding:14px 16px;min-width:0}
+.chartgrid.compact .chart h3{font-size:.98rem}
+.chartgrid.compact .chart .sub{margin-bottom:8px}
+.chartgrid.compact .donut-wrap{gap:12px;flex-wrap:nowrap}
+.chartgrid.compact .donut{width:104px;height:104px}
+.chartgrid.compact .donut .mid b{font-size:1.2rem}
+.chartgrid.compact .legend{min-width:0;gap:4px}
+.chartgrid.compact .legend li{font-size:.78rem}
+.chartgrid.compact .hbar{grid-template-columns:minmax(80px,112px) 1fr 28px;margin:6px 0;font-size:.8rem}
+.chartgrid.compact .funnel .fr{grid-template-columns:96px 1fr 70px;margin:6px 0;font-size:.8rem}
+.chartgrid.compact .funnel .fb{height:16px}
+.chartgrid.compact .feed{gap:6px;font-size:.82rem}
+.chartgrid.compact .stack-row{margin:7px 0}
+@media (max-width:1100px){.chartgrid.compact{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:700px){.chartgrid.compact{grid-template-columns:1fr}.chartgrid.compact .donut-wrap{flex-wrap:wrap}}
+
+/* expectation vs experience: one panel, one product at a time */
+.xpanel{padding:16px 18px;margin-top:6px}
+.xtop{display:flex;flex-wrap:wrap;gap:14px 24px;align-items:flex-end;justify-content:space-between;margin-bottom:12px}
+.xkp{display:flex;gap:22px;flex-wrap:wrap}
+.xkp div{display:flex;flex-direction:column}
+.xkp b{font-size:1.5rem;font-weight:800;line-height:1.1}
+.xkp span{font-size:.76rem;color:var(--muted)}
+.xsel{display:flex;flex-direction:column;gap:4px;min-width:min(100%,320px)}
+.xsel span{font-size:.74rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.xsel select{padding:10px 12px;border:1.5px solid var(--fc);border-radius:12px;font:inherit;font-weight:700;background:var(--surface);color:var(--ink);cursor:pointer}
+.xpanel .xcard{border:0;border-top:1px solid var(--line);border-radius:0;padding:14px 0 0;background:transparent}
+.xpanel .xcard[hidden]{display:none}
+.xcols{display:grid;grid-template-columns:1fr 1fr;gap:18px 28px;align-items:start}
+@media (max-width:760px){.xcols{grid-template-columns:1fr}}
+
+/* one Gemini box, three parts */
+.ai3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin-top:6px}
+.ai3 section{border-left:3px solid var(--fc);padding-left:14px;min-width:0}
+.ai3 h4{margin:0 0 6px;font-size:.95rem;display:flex;align-items:center;gap:8px}
+.ai3 h4 i{font-style:normal;width:22px;height:22px;border-radius:50%;background:var(--brand);color:#fff;font-size:.72rem;font-weight:800;display:grid;place-items:center;flex:none}
+.ai3 p{margin:0;font-size:.92rem;line-height:1.5}
+.ai3 .aih{font-weight:700;margin-bottom:4px}
+.ai3 ul{margin:.3em 0 0;padding-left:1.1em;font-size:.9rem}
+.ai3 li{margin-bottom:.4em}
+.aifoot{font-size:.78rem;margin:14px 0 0}
+@media (max-width:1000px){.ai3{grid-template-columns:1fr}}
