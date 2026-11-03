@@ -40,9 +40,9 @@
       img: 'img/underarm-roll-on.jpg', tag: 'Underarm care',
       forShort: 'Helps control underarm odour and reduce underarm pigmentation.',
       forList: ['Brand page: odour control and pigmentation care, with 4% lactic, 1% salicylic, 1% kojic and 1% mandelic acid.', 'Flora fragrance, 75 ml.'],
-      how: ['Apply directly on clean underarm skin.', 'Roll evenly and let it dry completely before you dress.', 'Use daily for best results.', 'The brand page says to wait 6 to 12 hours after waxing.'],
-      judge: 'The brand page says a change should be noticeable within about 3 months. Results vary.',
-      judgeShort: 'A change within about 3 months (brand page).',
+      how: ['Apply directly on clean underarm skin.', 'Roll evenly and let it dry completely before you dress.', 'Use daily for best results.', 'Wait 6 to 12 hours after waxing.'],
+      judge: 'The brand page says a change should be noticeable about 3 months. Results vary.',
+      judgeShort: 'A change about 3 months (brand page).',
       good: ['Do not apply to broken or irritated skin.', 'Patch test first: apply a little on your arm or elbow bend and leave it 12 to 24 hours.', 'Stop using it if you notice redness, itching or irritation.'],
       cautionShort: 'Not on broken or irritated skin. Patch test.',
       checkinDays: 14,
@@ -66,7 +66,7 @@
       img: 'img/hair-growth-serum.jpg', tag: 'Scalp care',
       forShort: 'A leave-in scalp serum for moderate hair fall and early thinning.',
       forList: ['Brand page: boosts new hair growth and reduces hair fall and thinning.', 'Water-based, non-greasy and fast-absorbing. For women over 18.'],
-      how: ['Apply on the scalp only, not on the hair strands.', 'Massage the scalp for about 2 minutes. Late evening or night is ideal. The page says twice a day in its steps and once a day in its FAQ, so follow your pack.', 'Do not apply before washing your hair. It is a leave-in.'],
+      how: ['Apply on the scalp only, not on the hair strands.', 'Massage the scalp for about 2 minutes. Late evening or night is ideal. Twice a day is usual, but follow the directions on your pack.', 'Do not apply before washing your hair. It is a leave-in.'],
       judge: 'The brand page says you will not see results in one month. Use it for at least 3 months.',
       judgeShort: 'At least 3 months; not in month 1 (brand page).',
       good: ['Check with a doctor first if you have allergies.', 'It is a leave-in. You do not wash it off.', 'The brand page says there is no quick fix, so give it time.'],
@@ -170,7 +170,7 @@
   var STATED = {
     sa1:    { weeks: [12, 12], en: 'about 3 months', hi: 'lagbhag 3 mahine' },
     aha5:   { weeks: [12, 16], en: '3 to 4 months', hi: '3 se 4 mahine' },
-    roll:   { weeks: null, en: 'within about 3 months', hi: 'lagbhag 3 mahine ke andar' },
+    roll:   { weeks: null, en: 'about 3 months', hi: 'lagbhag 3 mahine' },
     gum:    { weeks: [12, 12], en: 'about 3 months', hi: 'lagbhag 3 mahine' },
     serum:  { weeks: [12, 12], en: 'at least 3 months', hi: 'kam se kam 3 mahine' },
     lotion: { weeks: [12, 16], en: '3 to 4 months', hi: '3 se 4 mahine' }
@@ -203,7 +203,7 @@
   var SWAPEXT = {
     sa1: [
       { when: ['feel', 'results'], name: '1% Salicylic Ceramide Body Wash', size: '250 ml', price: '₹549', url: 'https://bebodywise.com/product/salicylic-ceramide-bodywash',
-        en: 'Same 1% salicylic acid, with a ceramide complex and chamomile. The page says it moisturises and strengthens the skin barrier, and suits body acne with dry skin.',
+        en: 'Same 1% salicylic acid, with a ceramide complex and chamomile. It moisturises, strengthens the skin barrier and suits body acne with dry skin.',
         hi: 'Wahi 1% salicylic acid, saath mein ceramide complex aur chamomile. Page ke hisaab se ye skin barrier ko majboot karta hai aur dry skin ke saath body acne ke liye hai.' },
       { when: ['feel'], name: 'Triple Milk Deep Hydrating Body Wash', size: '250 ml', price: '₹499', url: 'https://bebodywise.com/product/triple-milk-deep-hydrating-bodywash-xp',
         en: 'A gentler, hydrating wash with shea, coconut and oat milk. It is for dry, dehydrated skin and is not an acne treatment.',
@@ -298,7 +298,7 @@
       goodFit: ['You have moderate hair fall or early thinning.', 'You can apply it regularly and wait at least 3 months.'],
       think: ['You want results in a month (the page says not in month 1).', 'You have allergies: check with a doctor first.'],
       rating: { avg: 4.7, count: 144, sold: '102K' },
-      reviewNote: 'These are reviews of the serum and gummies combo pack, shown on the official page, so they are not for the serum alone.',
+      reviewNote: 'These are reviews of the serum and gummies combo pack, so they are not for the serum alone.',
       reviews: [{ n: 'Supriya D.', t: 'I am very impressed with the results.' }, { n: 'Aditi S.', t: 'Thinner hair with improved volume and reduced fall after 3 months.' }, { n: 'Simran A.', t: 'Reduced hair fall and new growth after 3 months.' }]
     },
     lotion: {
