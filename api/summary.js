@@ -15,7 +15,7 @@ function compact(stats) {
   const perProduct = {};
   P.ORDER.forEach((id) => { perProduct[P.PRODUCTS[id].name] = { started: c['pstart:' + id] || 0 }; });
   return {
-    sessions: c.sessions || 0, shared_with_brand: c.shared || 0,
+    sessions: c.sessions || 0, notes_left: c.notes || 0,
     how_is_it_going: pick('q1:'), how_used: pick('use:'), reasons_not_as_expected: pick('reason:'), verdicts: pick('verdict:'),
     products_started: perProduct,
     notes: (stats.notes || []).slice(0, 30).map((n) => ({ product: (P.PRODUCTS[n.product] || {}).name || '', tags: n.tags, text: n.text }))
