@@ -5,6 +5,7 @@
    Optional: set GEMINI_MODEL to force one. Open /api/summary?debug=1 to see what happened. */
 const store = require('../lib/store.js');
 const P = require('../data/products.js');
+const V = require('../lib/variance.js');
 /* Gemini helper is built into this file on purpose, so this endpoint works even if other files are missing. */
 
 
@@ -19,6 +20,20 @@ function compact(stats) {
     products_started: perProduct,
     notes: (stats.notes || []).slice(0, 30).map((n) => ({ product: (P.PRODUCTS[n.product] || {}).name || '', tags: n.tags, text: n.text }))
   };
+}
+
+
+/* Compact view of "expectation vs experience" for Gemini. The decision per product was already made by fixed rules in lib/variance.js. */
+function expBrief(counts) {
+  let a; try { a = V.analyse(counts || {}); } catch (e) { return []; }
+  return a.products.filter((r) => r.answered > 0).map((r) => ({
+    product: P.PRODUCTS[r.id].name, customers_who_set_expectations: r.receipts, answered_check_in: r.answered,
+    compared_with_hope: r.hope,
+    most_hoped_for: r.topOut ? V.label(r.id, r.topOut.id) : null,
+    most_common_expected_time: r.topTime ? (P.TIMES.filter((t) => t.id === r.topTime.id)[0] || {}).en : null,
+    timeline_on_pack_and_listing: P.PRODUCTS[r.id].stated && P.PRODUCTS[r.id].stated.en ? P.PRODUCTS[r.id].stated.en : 'not stated',
+    DECISION_ALREADY_MADE_BY_RULES: r.title, reason_for_decision: r.why
+  }));
 }
 
 const API = 'https://generativelanguage.googleapis.com/v1beta';
@@ -97,22 +112,27 @@ module.exports = async function handler(req, res) {
   const stats = await store.readStats();
   const total = (stats.counts || {}).sessions || 0;
   if (!total) return finish({ source: 'rules', reason: 'No check-ins recorded yet.' });
+  const xb = expBrief(stats.counts);
+  const sig = JSON.stringify([total, (stats.notes || []).length, xb.map((x) => [x.product, x.answered_check_in, x.compared_with_hope, x.DECISION_ALREADY_MADE_BY_RULES])]);
   try {
-    const hit = await store.cacheGet('fc:ai');
-    if (hit && !debug) { const o = JSON.parse(hit); if (o.total === total && o.notes === (stats.notes || []).length) return res.status(200).json(o.payload); }
+    const hit2 = await store.cacheGet('fc:ai3');
+    if (hit2 && !debug) { const o2 = JSON.parse(hit2); if (o2.sig === sig) return res.status(200).json(o2.payload); }
   } catch (e) { /* ignore cache problems */ }
 
-  const prompt = 'You are a product analyst for a skincare and wellness brand. Below are ANONYMOUS aggregate results from a post-purchase check-in ("FitCheck") plus short customer notes. ' +
-    'Write a short, honest readout for the brand team. Do not invent numbers that are not in the data. If the sample is small, say so. Do not give medical advice. ' +
-    'Return JSON only with this shape: {"headline": string (max 18 words), "themes": [{"title": string, "detail": string (max 28 words)}] (2 to 4 items), "actions": [string] (2 to 3 concrete product or content actions, each max 20 words)}.\n\nDATA:\n' + JSON.stringify(compact(stats));
+  const prompt = 'You are a product analyst for a skincare and wellness brand. Below are ANONYMOUS aggregate results from a post-purchase check-in ("FitCheck"), short customer notes, and an "expectation vs experience" comparison per product. ' +
+    'Write ONE short, honest readout for the brand team in three parts. Do not invent numbers or facts that are not in the data. If the sample is small, say so. Do not give medical advice. ' +
+    'For the expectation comparison, a fixed rule has ALREADY chosen each decision: explain it, do not change or contradict it. ' +
+    'Return JSON only with this shape: {"expectation": string (part 1: what customers hoped for versus what they got, naming the products that stand out; max 55 words; if there is no expectation data, say so in one short sentence), ' +
+    '"headline": string (part 2 headline on the check-in responses, max 18 words), "themes": [{"title": string, "detail": string (max 28 words)}] (part 2: 2 to 3 items on how customers say it is going, reasons and notes), ' +
+    '"actions": [string] (part 3: 2 to 3 concrete product or content actions that follow from parts 1 and 2, each max 20 words)}.\n\nCHECK_IN_DATA:\n' + JSON.stringify(compact(stats)) + '\n\nEXPECTATION_VS_EXPERIENCE:\n' + JSON.stringify(xb);
 
   const g = await ask(prompt), out = g.out, used = g.used;
   g.tried.forEach((t) => tried.push(t));
   if (!out) return finish({ source: 'rules', reason: 'Gemini did not return an answer. See "tried".' });
 
-  const payload = { source: 'gemini', model: used, headline: String(out.headline || '').slice(0, 200),
+  const payload = { source: 'gemini', model: used, expectation: String(out.expectation || '').slice(0, 520), headline: String(out.headline || '').slice(0, 200),
     themes: (out.themes || []).slice(0, 4).map((t) => ({ title: String(t.title || '').slice(0, 80), detail: String(t.detail || '').slice(0, 260) })),
     actions: (out.actions || []).slice(0, 3).map((a) => String(a).slice(0, 200)) };
-  try { await store.cacheSet('fc:ai', JSON.stringify({ total, notes: (stats.notes || []).length, payload }), 600); } catch (e) { /* ignore */ }
+  try { await store.cacheSet('fc:ai3', JSON.stringify({ sig, payload }), 600); } catch (e) { /* ignore */ }
   return finish(payload);
 };
