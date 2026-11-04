@@ -149,7 +149,7 @@
   var timer = null, lastTotal = '', lastData = null;
 
   function view() {
-    return '<span class="eyebrow"><span class="fcdot"></span>FitCheck Insights</span><h1 style="margin-top:8px">What the Be.Bodywise team would see</h1><span class="muted" style="font-size:.72rem">build 12</span>' +
+    return '<span class="eyebrow"><span class="fcdot"></span>FitCheck Insights</span><h1 style="margin-top:8px">What the Be.Bodywise team would see</h1><span class="muted" style="font-size:.72rem">build 13</span>' +
       '<p class="muted" style="max-width:48em">Anonymous answers only: no names, no phone numbers. Every WhatsApp or browser check-in updates the Live tab in seconds.</p>' +
       '<div class="ins-bar"><div class="seg" role="tablist"><button class="on" data-seg="live" role="tab" type="button">Live demo sessions</button><button data-seg="sample" role="tab" type="button">Sample data</button></div><span id="segTag"></span><span class="muted" id="stamp" style="font-size:.82rem"></span></div>' +
       '<div id="insBody"></div>';
@@ -191,7 +191,7 @@
   /* ---------- Expectation vs experience ---------- */
 
   /* ---------- "if we fix this" estimate ---------- */
-  var impIn = { buyers: 1000, checkin: 40, rescue: 15, repeats: 2, order: 550 };
+  var impIn = { buyers: 1000, checkin: 40, rescue: 15, repeats: 2, order: 550, margin: 60, cac: 700 };
   var inr = function (n) { return '₹' + Math.round(n).toLocaleString('en-IN'); };
   var f1 = function (n) { return (Math.round(n * 10) / 10).toLocaleString('en-IN'); };
   function impactOut(c, sample) {
@@ -205,17 +205,20 @@
       row('Buyers kept per month', 'rescued', function (x) { return f1(x); }) +
       row('Repeat-buyer rate, points gained', 'retention', function (x) { return '+' + f1(x); }) +
       row('NPS, points gained', 'nps', function (x) { return '+' + f1(x); }) +
-      row('Extra repeat revenue per month', 'revenue', inr) + '</tbody></table></div>';
+      row('Extra repeat revenue per month', 'revenue', inr) +
+      row('Extra contribution profit per month', 'profit', inr) +
+      row('CAC saved per month (re-acquisition avoided)', 'cacSaved', inr) + '</tbody></table></div>';
   }
   function impactSection(c, sample) {
     var fld = function (id, lab, hint, step) { return '<label class="imp-f"><span>' + lab + '</span><input type="number" min="0" step="' + (step || 1) + '" data-imp="' + id + '" value="' + impIn[id] + '" inputmode="decimal"><em>' + hint + '</em></label>'; };
     return '<div class="sec-h" style="margin-top:28px"><h2 style="margin:0">If we fix this: what it could mean</h2></div>' +
-      '<p class="muted" style="max-width:52em;margin:6px 0 14px">A rough estimate of how many buyers FitCheck could keep, and what that does to repeat purchases and NPS. Only the first number below comes from the check-ins. The five boxes are <b>assumptions you can change</b>, not Be.Bodywise data.</p>' +
+      '<p class="muted" style="max-width:52em;margin:6px 0 14px">A rough estimate of how many buyers FitCheck could keep, and what that does to repeat purchases, NPS and unit economics (contribution profit and CAC avoided). Only the first number below comes from the check-ins. The seven boxes are <b>assumptions you can change</b>, not Be.Bodywise data.</p>' +
       '<div class="card" id="impBox"><div class="imp-in">' +
       fld('buyers', 'Buyers per month', 'for the products in FitCheck', 50) + fld('checkin', 'Finish the check-in (%)', 'share who reply', 5) + fld('rescue', 'Kept because of FitCheck (%)', 'of the helpable ones', 1) +
-      fld('repeats', 'Extra orders each', 'per kept buyer', 1) + fld('order', 'Average order (₹)', 'demo store prices', 50) + '</div>' +
+      fld('repeats', 'Extra orders each', 'per kept buyer', 1) + fld('order', 'Average order (₹)', 'demo store prices', 50) +
+      fld('margin', 'Gross margin (%)', 'of AOV, typical D2C wellness', 5) + fld('cac', 'CAC (₹ per customer)', 'paid-media cost to acquire one', 50) + '</div>' +
       '<div id="impOut">' + impactOut(c, sample) + '</div>' +
-      '<details class="imp-how"><summary>How it is worked out</summary><p>Buyers kept = buyers × check-in rate × helpable share × kept rate. Repeat-buyer rate and NPS both rise by (buyers kept ÷ buyers) × 100 points: each kept buyer becomes a repeat buyer, and an unhappy buyer moving to neutral counts as +1, a cautious count. Extra revenue = buyers kept × extra orders × average order. Cautious uses half the kept rate; optimistic uses one and a half times. Change the boxes to test your own beliefs. Treat the result as a way to size the idea, and replace the assumptions with real numbers from a pilot.</p></details></div>';
+      '<details class="imp-how"><summary>How it is worked out</summary><p>Buyers kept = buyers × check-in rate × helpable share × kept rate. Repeat-buyer rate and NPS both rise by (buyers kept ÷ buyers) × 100 points: each kept buyer becomes a repeat buyer, and an unhappy buyer moving to neutral counts as +1, a cautious count. Extra revenue = buyers kept × extra orders × average order. Extra contribution profit applies the gross-margin assumption to that revenue, since top-line revenue is not what a D2C brand keeps. CAC saved treats each kept buyer as one fewer new customer to acquire at CAC: retaining is usually cheaper than re-acquiring. Cautious uses half the kept rate; optimistic uses one and a half times. Change the boxes to test your own beliefs. Treat the result as a way to size the idea, and replace the assumptions with real numbers from a pilot.</p></details></div>';
   }
   function bindImpact(c, sample) {
     var box = $('#impBox'); if (!box) return;
