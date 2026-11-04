@@ -149,7 +149,7 @@
   var timer = null, lastTotal = '', lastData = null;
 
   function view() {
-    return '<span class="eyebrow"><span class="fcdot"></span>FitCheck Insights</span><h1 style="margin-top:8px">What the Be.Bodywise team would see</h1><span class="muted" style="font-size:.72rem">build 10</span>' +
+    return '<span class="eyebrow"><span class="fcdot"></span>FitCheck Insights</span><h1 style="margin-top:8px">What the Be.Bodywise team would see</h1><span class="muted" style="font-size:.72rem">build 11</span>' +
       '<p class="muted" style="max-width:48em">Anonymous answers only: no names, no phone numbers. Every WhatsApp or browser check-in updates the Live tab in seconds.</p>' +
       '<div class="ins-bar"><div class="seg" role="tablist"><button class="on" data-seg="live" role="tab" type="button">Live demo sessions</button><button data-seg="sample" role="tab" type="button">Sample data</button></div><span id="segTag"></span><span class="muted" id="stamp" style="font-size:.82rem"></span></div>' +
       '<div id="insBody"></div>';
@@ -174,14 +174,18 @@
     var charts = '<div class="chartgrid compact">' +
       '<div class="chart"><h3>How is it going?</h3><div class="sub">Customer answer at the check-in</div>' + donut(q1, 'answers') + '</div>' +
       '<div class="chart"><h3>Verdicts given</h3><div class="sub">Fixed rules, no AI medical advice</div>' + donut(vd, 'verdicts') + '</div>' +
-      '<div class="chart"><h3>What felt wrong</h3><div class="sub">Up to three reasons each</div>' + hbars(rs, 'var(--s1)') + '</div>' +
+      '<div class="chart"><h3>What felt wrong</h3><div class="sub">Up to three reasons each</div>' + hbars(rs, 'var(--s1)') + '</div></div>';
+    /* These four go together as a 2x2 grid: the check-in funnel, per-product experience,
+       latest activity and the expectation-vs-experience card. Same content as before, new arrangement. */
+    var pairgrid = '<div class="chartgrid pairs">' +
       '<div class="chart"><h3>From check-in to feedback</h3><div class="sub">Each product check-in is one unit</div>' + funnel(c) + '</div>' +
+      '<div class="chart"><h3>Experience by product</h3><div class="sub">Where each product stands at its check-in</div>' + perProduct(c) + '</div>' +
       '<div class="chart"><h3>Latest activity</h3><div class="sub">Anonymous, newest first</div>' + feedHtml(d.feed, sample) + '</div>' +
-      '<div class="chart" style="grid-column:1/-1"><h3>Experience by product</h3><div class="sub">Where each product stands at its check-in</div>' + perProduct(c) + '</div></div>';
+      '<div class="chart expcell">' + expSection(c, sample) + '</div></div>';
     var ai = '<div class="ai" id="aiBox">' + aiInner(sample ? SAMPLE_AI : (lastAi && lastAi.source === 'gemini' ? lastAi : null), c, sample) + '</div>';
     var notesList = d.notes && d.notes.length ? d.notes.slice(0, 12).map(function (n) { return '<div class="note">' + esc(n.text) + '<br><small>' + esc((PRODUCTS[n.product] || { name: '' }).name) + (n.tags && n.tags.length ? ' · ' + esc(n.tags.join(', ')) : '') + (n.t ? ' · ' + ago(n.t) : '') + '</small></div>'; }).join('') : '<p class="muted" style="margin:0">No notes yet. Notes appear when a customer adds a line in their own words.</p>';
     var notes = '<details class="card notesbox"><summary><h3>Anonymous notes</h3><span class="hint">Click to view</span></summary><div class="nlist">' + notesList + '</div></details>';
-    return warn + kpis + charts + expSection(c, sample) + ai + notes + impactSection(c, sample) + tools(!sample);
+    return warn + kpis + charts + pairgrid + ai + notes + impactSection(c, sample) + tools(!sample);
   }
 
   /* ---------- Expectation vs experience ---------- */
