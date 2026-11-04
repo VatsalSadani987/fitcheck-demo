@@ -149,7 +149,7 @@
   var timer = null, lastTotal = '', lastData = null;
 
   function view() {
-    return '<span class="eyebrow"><span class="fcdot"></span>FitCheck Insights</span><h1 style="margin-top:8px">What the Be.Bodywise team would see</h1><span class="muted" style="font-size:.72rem">build 11</span>' +
+    return '<span class="eyebrow"><span class="fcdot"></span>FitCheck Insights</span><h1 style="margin-top:8px">What the Be.Bodywise team would see</h1><span class="muted" style="font-size:.72rem">build 12</span>' +
       '<p class="muted" style="max-width:48em">Anonymous answers only: no names, no phone numbers. Every WhatsApp or browser check-in updates the Live tab in seconds.</p>' +
       '<div class="ins-bar"><div class="seg" role="tablist"><button class="on" data-seg="live" role="tab" type="button">Live demo sessions</button><button data-seg="sample" role="tab" type="button">Sample data</button></div><span id="segTag"></span><span class="muted" id="stamp" style="font-size:.82rem"></span></div>' +
       '<div id="insBody"></div>';
@@ -228,31 +228,26 @@
   var xSel = '';
   function expSection(c, sample) {
     var V = window.FitVariance, a = V.analyse(c);
-    var head = '<div class="sec-h" style="margin-top:6px"><h2 style="margin:0">Expectation vs experience</h2></div>' +
-      '<p class="muted" style="max-width:52em;margin:6px 0 12px">Before buying, customers said what they hoped for and by when. At the check-in they said how it compared. Pick a product to see its result. Decisions come from fixed rules.</p>';
-    if (!a.products.length) return head + '<div class="card"><p class="muted" style="margin:0">No expectation receipts yet. On the store, pick what you hope for on a product page or at checkout, order, then run the check-in.</p></div>';
+    var head = '<h3>Expectation vs experience</h3><div class="sub">What customers hoped for, versus what they got. Pick a product.</div>';
+    if (!a.products.length) return head + '<p class="muted" style="margin:0">No expectation receipts yet.</p>';
     if (!xSel || !a.products.some(function (r) { return r.id === xSel; })) xSel = (a.products.filter(function (r) { return r.tone === 'bad' || r.tone === 'warn'; })[0] || a.products[0]).id;
-    var kp = '<div class="xkp"><div><b>' + a.receipts + '</b><span>receipts</span></div><div><b>' + a.answered + '</b><span>compared with hope</span></div><div><b>' + Math.round(100 * a.lessShare) + '%</b><span>fell short of hope</span></div></div>';
+    var kp = '<div class="xkp"><div><b>' + a.receipts + '</b><span>receipts</span></div><div><b>' + a.answered + '</b><span>compared</span></div><div><b>' + Math.round(100 * a.lessShare) + '%</b><span>fell short</span></div></div>';
     var opts = a.products.map(function (r) { return '<option value="' + r.id + '"' + (r.id === xSel ? ' selected' : '') + '>' + esc(PRODUCTS[r.id].name) + ' · ' + esc(r.title) + '</option>'; }).join('');
-    var sel = '<label class="xsel"><span>Choose a product</span><select id="xSelect" aria-label="Choose a product to see its expectation vs experience">' + opts + '</select></label>';
+    var sel = '<label class="xsel"><select id="xSelect" aria-label="Choose a product to see its expectation vs experience">' + opts + '</select></label>';
     var cards = a.products.map(function (r) {
       var p = PRODUCTS[r.id], t = r.answered || 1, h = r.hope;
       var seg = function (n, col, lab) { return n ? '<i style="width:' + (100 * n / t) + '%;background:' + col + '" title="' + lab + ': ' + n + '"></i>' : ''; };
       var topT = r.topTime ? (P.TIMES.filter(function (x) { return x.id === r.topTime.id; })[0] || {}).en : '–';
-      var sooner = r.receipts ? Math.round(100 * (r.gap.longer || 0) / r.receipts) : 0;
       return '<div class="xcard" data-xid="' + r.id + '"' + (r.id === xSel ? '' : ' hidden') + '><h4><span>' + esc(p.name) + '</span><span class="dpill ' + r.tone + '">' + esc(r.title) + '</span></h4>' +
-        '<div class="sub">' + r.receipts + ' receipts · ' + r.answered + ' answered the check-in</div><div class="xcols"><div>' +
+        '<div class="sub">' + r.receipts + ' receipts · ' + r.answered + ' answered</div>' +
         (r.answered ? '<div class="xbar" role="img" aria-label="' + h.better + ' better, ' + h.as + ' as hoped, ' + h.less + ' less than hoped">' + seg(h.better, 'var(--s3)', 'Better') + seg(h.as, 'var(--s1)', 'As hoped') + seg(h.less, 'var(--s2)', 'Less') + '</div>' +
-          '<ul class="xleg"><li><span class="sw" style="background:var(--s3)"></span>Better ' + h.better + '</li><li><span class="sw" style="background:var(--s1)"></span>As hoped ' + h.as + '</li><li><span class="sw" style="background:var(--s2)"></span>Less than hoped ' + h.less + '</li></ul>' : '<p class="muted" style="margin:0 0 8px;font-size:.86rem">No one has answered the check-in for this product yet.</p>') +
+          '<ul class="xleg"><li><span class="sw" style="background:var(--s3)"></span>Better ' + h.better + '</li><li><span class="sw" style="background:var(--s1)"></span>As hoped ' + h.as + '</li><li><span class="sw" style="background:var(--s2)"></span>Less ' + h.less + '</li></ul>' : '<p class="muted" style="margin:0 0 8px;font-size:.84rem">No one has answered the check-in for this product yet.</p>') +
         '<div class="xkv"><span>Hoped for most</span><span>' + (r.topOut ? esc(V.label(r.id, r.topOut.id)) : '–') + '</span>' +
-        '<span>Expected change in</span><span>' + esc(topT) + '</span>' +
-        '<span>Pack says</span><span>' + esc(p.stated && p.stated.en ? p.stated.en : 'Not stated') + '</span>' +
-        '<span>Hoped sooner than pack</span><span>' + sooner + '% of receipts</span>' +
-        '<span>Fell shortest</span><span>' + (r.missed ? esc(V.label(r.id, r.missed.id)) : '–') + '</span></div></div><div>' +
-        '<div class="xwhy" style="font-size:.88rem">' + esc(r.why) + '</div>' +
-        '<div class="xaction"><b>Team:</b> ' + esc(r.action) + '</div></div></div></div>';
+        '<span>Expected in</span><span>' + esc(topT) + '</span>' +
+        '<span>Pack says</span><span>' + esc(p.stated && p.stated.en ? p.stated.en : 'Not stated') + '</span></div>' +
+        '<div class="xaction"><b>Team:</b> ' + esc(r.action) + '</div></div>';
     }).join('');
-    return head + '<div class="card xpanel" id="xPanel"><div class="xtop">' + kp + sel + '</div>' + cards + '</div>';
+    return head + '<div class="xtop">' + kp + sel + '</div>' + cards;
   }
   function bindExp() {
     var sel = $('#xSelect'); if (!sel) return;
@@ -264,9 +259,9 @@
   function feedHtml(feed, sample) {
     if (sample) return '<p class="muted" style="margin:0">The live tab shows each anonymous check-in here as it happens.</p>';
     if (!feed || !feed.length) return '<p class="muted" style="margin:0">Waiting for the first verdict…</p>';
-    return '<ul class="feed">' + feed.slice(0, 5).map(function (f) {
-      return '<li><span class="tm">' + ago(f.t) + '</span><span>' + esc((PRODUCTS[f.product] || { nick: 'product' }).nick) + ': ' + esc(L.q1[f.q1] || 'checked in') + ' → <b>' + esc(L.verdict[f.verdict] || f.verdict) + '</b></span><span class="src">' + (f.src === 'whatsapp' ? 'WhatsApp' : 'Browser') + '</span></li>';
-    }).join('') + '</ul>';
+    return '<div class="feed2">' + feed.slice(0, 4).map(function (f) {
+      return '<div class="fi"><span class="tm">' + ago(f.t) + '<span class="src">' + (f.src === 'whatsapp' ? 'WhatsApp' : 'Browser') + '</span></span><span>' + esc((PRODUCTS[f.product] || { nick: 'product' }).nick) + ': ' + esc(L.q1[f.q1] || 'checked in') + ' → <b>' + esc(L.verdict[f.verdict] || f.verdict) + '</b></span></div>';
+    }).join('') + '</div>';
   }
 
   function tools(live) {
