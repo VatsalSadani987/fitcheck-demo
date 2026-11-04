@@ -766,16 +766,33 @@ img,svg,video{max-width:100%}
 
 .know .kb ul.ing li{margin:0 0 6px}.know .kb ul.ing span{display:block}.know .mini{margin:0 0 6px;padding-left:1.2em}.know .mini li{font-size:.88rem;margin:3px 0}
 
-/* ---------- v14: 2x2 layout for funnel / per-product / latest activity / expectation card ---------- */
-.chartgrid.pairs{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:start;margin-top:16px}
-.chartgrid.pairs .chart{padding:16px 18px;min-width:0}
+/* ---------- v15: 2x2 layout for funnel / per-product / latest activity / expectation card ---------- */
+.chartgrid.pairs{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:stretch;margin-top:16px}
+.chartgrid.pairs .chart{padding:16px 18px;min-width:0;display:flex;flex-direction:column}
 .chartgrid.pairs .chart h3{font-size:.98rem}
 .chartgrid.pairs .chart .sub{margin-bottom:8px}
 .chartgrid.pairs .funnel .fr{grid-template-columns:110px 1fr 70px;margin:6px 0;font-size:.82rem}
-.chartgrid.pairs .feed{gap:6px;font-size:.82rem}
 .chartgrid.pairs .stack-row{margin:7px 0}
-.expcell .sec-h{margin-top:0}
-.expcell .sec-h h2{font-size:.98rem}
-.expcell > p.muted{font-size:.8rem;margin:4px 0 10px}
-.expcell .card.xpanel{border:0;padding:0;box-shadow:none;background:transparent}
-@media(max-width:900px){.chartgrid.pairs{grid-template-columns:1fr}}
+/* Latest activity: 2x2 grid of the 4 newest items, same height class as its row partner */
+.feed2{display:grid;grid-template-columns:1fr 1fr;gap:10px;flex:1}
+.fi{border:1px solid var(--line);border-radius:10px;padding:9px 11px;font-size:.82rem;display:flex;flex-direction:column;gap:5px}
+.fi .tm{color:var(--muted);font-size:.72rem;display:flex;justify-content:space-between;align-items:center}
+.fi .tm .src{font-size:.64rem;font-weight:700;border-radius:6px;padding:2px 6px;background:var(--soft);color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+@media(max-width:480px){.feed2{grid-template-columns:1fr}}
+/* Expectation vs experience: compact, single column, no outer card chrome (the .chart cell is the card) */
+.expcell h3{margin:0 0 2px}
+.expcell > .sub{font-size:.8rem;margin-bottom:10px}
+.expcell .xtop{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:space-between;margin-bottom:10px}
+.expcell .xkp{gap:14px}
+.expcell .xkp b{font-size:1.15rem}
+.expcell .xkp span{font-size:.7rem}
+.expcell .xsel{min-width:0;flex:1}
+.expcell .xsel select{padding:7px 10px;font-size:.84rem;border-radius:10px}
+.expcell .xcard{border:0;border-top:1px solid var(--line);border-radius:0;padding:12px 0 0;background:transparent;gap:8px}
+.expcell .xcard h4{font-size:.92rem}
+.expcell .xcard .sub{font-size:.76rem}
+.expcell .xbar{height:10px}
+.expcell .xleg{font-size:.76rem;gap:3px 10px}
+.expcell .xkv{font-size:.8rem;gap:3px 10px}
+.expcell .xaction{font-size:.8rem}
+@media(max-width:900px){.chartgrid.pairs{grid-template-columns:1fr}.chartgrid.pairs .chart{min-height:0}}
