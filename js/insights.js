@@ -146,10 +146,10 @@
   }
 
   /* ---------- page ---------- */
-  var timer = null, lastTotal = '', lastData = null;
+  var timer = null, lastTotal = '', lastData = null, notesOpen = false; // whether the viewer has the Anonymous notes card open, kept across live redraws
 
   function view() {
-    return '<span class="eyebrow"><span class="fcdot"></span>FitCheck Insights</span><h1 style="margin-top:8px">What the Be.Bodywise team would see</h1><span class="muted" style="font-size:.72rem">build 13</span>' +
+    return '<span class="eyebrow"><span class="fcdot"></span>FitCheck Insights</span><h1 style="margin-top:8px">What the Be.Bodywise team would see</h1><span class="muted" style="font-size:.72rem">build 15</span>' +
       '<p class="muted" style="max-width:48em">Anonymous answers only: no names, no phone numbers. Every WhatsApp or browser check-in updates the Live tab in seconds.</p>' +
       '<div class="ins-bar"><div class="seg" role="tablist"><button class="on" data-seg="live" role="tab" type="button">Live demo sessions</button><button data-seg="sample" role="tab" type="button">Sample data</button></div><span id="segTag"></span><span class="muted" id="stamp" style="font-size:.82rem"></span></div>' +
       '<div id="insBody"></div>';
@@ -184,7 +184,7 @@
       '<div class="chart expcell">' + expSection(c, sample) + '</div></div>';
     var ai = '<div class="ai" id="aiBox">' + aiInner(sample ? SAMPLE_AI : (lastAi && lastAi.source === 'gemini' ? lastAi : null), c, sample) + '</div>';
     var notesList = d.notes && d.notes.length ? d.notes.slice(0, 12).map(function (n) { return '<div class="note">' + esc(n.text) + '<br><small>' + esc((PRODUCTS[n.product] || { name: '' }).name) + (n.tags && n.tags.length ? ' · ' + esc(n.tags.join(', ')) : '') + (n.t ? ' · ' + ago(n.t) : '') + '</small></div>'; }).join('') : '<p class="muted" style="margin:0">No notes yet. Notes appear when a customer adds a line in their own words.</p>';
-    var notes = '<details class="card notesbox"><summary><h3>Anonymous notes</h3><span class="hint">Click to view</span></summary><div class="nlist">' + notesList + '</div></details>';
+    var notes = '<details class="card notesbox"' + (notesOpen ? ' open' : '') + '><summary><h3>Anonymous notes</h3><span class="hint">Click to view</span></summary><div class="nlist">' + notesList + '</div></details>';
     return warn + kpis + charts + pairgrid + ai + notes + impactSection(c, sample) + tools(!sample);
   }
 
@@ -194,30 +194,37 @@
   var impIn = { buyers: 1000, checkin: 40, rescue: 15, repeats: 2, order: 550, margin: 60, cac: 700 };
   var inr = function (n) { return '₹' + Math.round(n).toLocaleString('en-IN'); };
   var f1 = function (n) { return (Math.round(n * 10) / 10).toLocaleString('en-IN'); };
+  /* The three scenarios as cards (not a table): easier to scan, and the base case reads as the headline. */
+  var IMP_ROWS = [
+    ['Buyers kept', 'rescued', function (x) { return f1(x) + ' /mo'; }],
+    ['Repeat-buyer rate', 'retention', function (x) { return '+' + f1(x) + ' pts'; }],
+    ['NPS', 'nps', function (x) { return '+' + f1(x) + ' pts'; }],
+    ['Extra revenue', 'revenue', function (x) { return inr(x) + '/mo'; }],
+    ['Contribution profit', 'profit', function (x) { return inr(x) + '/mo'; }],
+    ['CAC saved (re-acquisition avoided)', 'cacSaved', function (x) { return inr(x) + '/mo'; }]
+  ];
   function impactOut(c, sample) {
     var V = window.FitVariance, usedSample = false, src = c;
     if (V.impact(c, impIn).verdicts < 5) { src = buildSample().counts; usedSample = true; }
     var r = V.impact(src, impIn);
-    var row = function (lab, f, fmt) { return '<tr><th scope="row">' + lab + '</th><td>' + fmt(r.low[f]) + '</td><td class="b">' + fmt(r.base[f]) + '</td><td>' + fmt(r.high[f]) + '</td></tr>'; };
+    var card = function (label, scen, feat) {
+      return '<div class="imp-card' + (feat ? ' feat' : '') + '"><div class="imp-card-h">' + (feat ? '<span class="imp-star">★</span> ' : '') + label + '</div>' +
+        IMP_ROWS.map(function (row) { return '<div class="imp-row"><span>' + row[0] + '</span><b>' + row[2](r[scen][row[1]]) + '</b></div>'; }).join('') + '</div>';
+    };
     return (usedSample ? '<div class="warnbox" style="margin-bottom:12px">Fewer than 5 check-ins so far, so this uses the invented sample share of fixable check-ins. It will switch to your live numbers once 5 check-ins are in.</div>' : '') +
-      '<p class="imp-line"><b>' + Math.round(100 * r.share) + '%</b> of ' + r.verdicts + ' check-ins ' + (usedSample ? '(sample) ' : '') + 'ended as <i>wait longer</i>, <i>adjust usage</i> or <i>swap</i>. These are customers who could be helped, and who might otherwise quietly leave.</p>' +
-      '<div class="tw"><table class="imp-t"><thead><tr><th></th><th scope="col">Cautious</th><th scope="col">Base case</th><th scope="col">Optimistic</th></tr></thead><tbody>' +
-      row('Buyers kept per month', 'rescued', function (x) { return f1(x); }) +
-      row('Repeat-buyer rate, points gained', 'retention', function (x) { return '+' + f1(x); }) +
-      row('NPS, points gained', 'nps', function (x) { return '+' + f1(x); }) +
-      row('Extra repeat revenue per month', 'revenue', inr) +
-      row('Extra contribution profit per month', 'profit', inr) +
-      row('CAC saved per month (re-acquisition avoided)', 'cacSaved', inr) + '</tbody></table></div>';
+      '<p class="imp-line"><b>' + Math.round(100 * r.share) + '%</b> of ' + r.verdicts + ' check-ins ' + (usedSample ? '(sample) ' : '') + 'ended as <i>wait longer</i>, <i>adjust usage</i> or <i>swap</i> &mdash; customers who could be helped, and who might otherwise quietly leave.</p>' +
+      '<div class="imp-scen">' + card('Cautious', 'low') + card('Base case', 'base', true) + card('Optimistic', 'high') + '</div>';
   }
   function impactSection(c, sample) {
     var fld = function (id, lab, hint, step) { return '<label class="imp-f"><span>' + lab + '</span><input type="number" min="0" step="' + (step || 1) + '" data-imp="' + id + '" value="' + impIn[id] + '" inputmode="decimal"><em>' + hint + '</em></label>'; };
     return '<div class="sec-h" style="margin-top:28px"><h2 style="margin:0">If we fix this: what it could mean</h2></div>' +
       '<p class="muted" style="max-width:52em;margin:6px 0 14px">A rough estimate of how many buyers FitCheck could keep, and what that does to repeat purchases, NPS and unit economics (contribution profit and CAC avoided). Only the first number below comes from the check-ins. The seven boxes are <b>assumptions you can change</b>, not Be.Bodywise data.</p>' +
-      '<div class="card" id="impBox"><div class="imp-in">' +
+      '<div class="card" id="impBox">' +
+      '<div class="imp-grp"><h4>Assumptions</h4><div class="imp-in">' +
       fld('buyers', 'Buyers per month', 'for the products in FitCheck', 50) + fld('checkin', 'Finish the check-in (%)', 'share who reply', 5) + fld('rescue', 'Kept because of FitCheck (%)', 'of the helpable ones', 1) +
       fld('repeats', 'Extra orders each', 'per kept buyer', 1) + fld('order', 'Average order (₹)', 'demo store prices', 50) +
-      fld('margin', 'Gross margin (%)', 'of AOV, typical D2C wellness', 5) + fld('cac', 'CAC (₹ per customer)', 'paid-media cost to acquire one', 50) + '</div>' +
-      '<div id="impOut">' + impactOut(c, sample) + '</div>' +
+      fld('margin', 'Gross margin (%)', 'of AOV, typical D2C wellness', 5) + fld('cac', 'CAC (₹ per customer)', 'paid-media cost to acquire one', 50) + '</div></div>' +
+      '<div class="imp-grp"><h4>Result</h4><div id="impOut">' + impactOut(c, sample) + '</div></div>' +
       '<details class="imp-how"><summary>How it is worked out</summary><p>Buyers kept = buyers × check-in rate × helpable share × kept rate. Repeat-buyer rate and NPS both rise by (buyers kept ÷ buyers) × 100 points: each kept buyer becomes a repeat buyer, and an unhappy buyer moving to neutral counts as +1, a cautious count. Extra revenue = buyers kept × extra orders × average order. Extra contribution profit applies the gross-margin assumption to that revenue, since top-line revenue is not what a D2C brand keeps. CAC saved treats each kept buyer as one fewer new customer to acquire at CAC: retaining is usually cheaper than re-acquiring. Cautious uses half the kept rate; optimistic uses one and a half times. Change the boxes to test your own beliefs. Treat the result as a way to size the idea, and replace the assumptions with real numbers from a pilot.</p></details></div>';
   }
   function bindImpact(c, sample) {
@@ -339,7 +346,11 @@
   function mount() {
     var el = $('#insBody'), tag = $('#segTag'), stamp = $('#stamp'), mode = 'live';
     function paint(d, sample) {
+      // read the notes card's open/closed state from the live DOM right before it gets replaced, so a repaint
+      // (new check-ins arriving on the Live tab) can never close it under the viewer: only their own click can.
+      var prevNb = $('.notesbox'); if (prevNb) notesOpen = prevNb.open;
       lastData = d; el.innerHTML = body(d, sample); try { bindImpact(d.counts || {}, sample); } catch (e) { console.error('impact', e); }
+      var nb = $('.notesbox'); if (nb) nb.ontoggle = function () { notesOpen = nb.open; };
       var b = $('#csvBtn'); if (b) b.onclick = function () {
         var blob = new Blob([csv(d)], { type: 'text/csv' }), a = document.createElement('a');
         a.href = URL.createObjectURL(blob); a.download = 'fitcheck-insights.csv'; document.body.appendChild(a); a.click(); a.remove();
@@ -368,7 +379,7 @@
           if (mode !== 'live' || !$('#insBody')) return;
           var sig = JSON.stringify([d.counts, (d.notes || []).length, (d.feed || []).length && d.feed[0].t, d.configured, d.error]);
           if (sig !== lastJson) { lastJson = sig; paint(d, false); } // only redraw when something changed, so open sections and hovers are not reset
-          else { var f = $('.feed'); if (f && d.feed) f.outerHTML = feedHtml(d.feed, false); }
+          else { var f = $('.feed2'); if (f && d.feed) f.outerHTML = feedHtml(d.feed, false); }
           stamp.textContent = 'Updated ' + new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
         })
         .catch(function () { if (mode === 'live' && $('#insBody') && !lastData) { el.innerHTML = '<div class="warnbox">Could not load live data. If you are running this page from a file, open the deployed site instead.</div>'; } });
