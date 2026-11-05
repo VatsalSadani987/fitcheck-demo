@@ -373,13 +373,13 @@ table.t tr:last-child td{border-bottom:0}
 .pcard .phw{position:relative}
 .pcard .qbtn{position:absolute;top:22px;right:22px;width:28px;height:28px;border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--brand-d);font:700 .85rem/1 Georgia,serif;font-style:italic;cursor:pointer;display:grid;place-items:center;box-shadow:0 2px 8px rgba(0,0,0,.12);z-index:3}
 .pcard .qbtn:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
-.pcard .quick{position:absolute;inset:0;z-index:2;background:var(--surface);padding:14px 46px 12px 16px;overflow:auto;font-size:.8rem;line-height:1.38;color:var(--ink);opacity:0;visibility:hidden;transition:opacity .15s,visibility .15s;pointer-events:none;border-bottom:1px solid var(--line)}
-.pcard .quick p{margin:0 0 6px}
-.pcard .quick ul{margin:0 0 6px;padding-left:1.1em}
-.pcard .quick li{margin-bottom:2px}
-.pcard .qt{font-size:.95rem;font-weight:800;margin-bottom:6px;color:var(--ink)}
-.pcard .qk{font-size:.66rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--fc-ink);margin-bottom:1px}
-.pcard .qm{pointer-events:auto;font-weight:700;font-size:.8rem;color:var(--brand-d)}
+.pcard .quick{position:absolute;inset:0;z-index:2;background:var(--surface);padding:16px 48px 14px 18px;overflow:auto;font-size:1rem;line-height:1.46;color:var(--ink);opacity:0;visibility:hidden;transition:opacity .15s,visibility .15s;pointer-events:none;border-bottom:1px solid var(--line)}
+.pcard .quick p{margin:0 0 7px}
+.pcard .quick ul{margin:0 0 7px;padding-left:1.15em}
+.pcard .quick li{margin-bottom:1px}
+.pcard .qt{font-size:1.18rem;font-weight:800;margin-bottom:7px;color:var(--ink)}
+.pcard .qk{font-size:.82rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--fc-ink);margin-bottom:2px}
+.pcard .qm{pointer-events:auto;font-weight:700;font-size:1rem;color:var(--brand-d)}
 .pcard.open .quick{opacity:1;visibility:visible}
 .pcard.open .qbtn{background:var(--btn);color:#fff}
 @media (hover:hover){
@@ -505,21 +505,28 @@ details.team>summary:focus-visible{outline:2px solid var(--fc);outline-offset:4p
 .rv-list li span{display:block;margin-top:6px;font-size:.78rem;color:var(--muted);font-weight:700}
 
 /* Insights: impact estimate */
-.imp-in{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:16px}
+.imp-grp{margin-bottom:18px}
+.imp-grp h4{margin:0 0 10px;font-size:.76rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.imp-in{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
 .imp-f span{display:block;font-size:.8rem;font-weight:700;margin-bottom:4px}
 .imp-f input{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:10px;font:inherit;background:var(--surface);color:var(--ink)}
 .imp-f em{display:block;font-size:.74rem;color:var(--muted);font-style:normal;margin-top:3px}
-.imp-line{margin:0 0 12px;font-size:.95rem}
-.imp-t{width:100%;border-collapse:collapse;font-size:.92rem}
-.imp-t th,.imp-t td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:right}
-.imp-t th:first-child,.imp-t thead th:first-child{text-align:left}
-.imp-t thead th{font-size:.76rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
-.imp-t td.b{font-weight:800;background:var(--fc-soft);color:var(--fc-ink)}
-.imp-t tbody th{font-weight:600}
-.imp-how{margin-top:12px}
+.imp-line{margin:0 0 14px;font-size:.95rem}
+/* Three scenario cards instead of a table: Cautious / Base case / Optimistic, base case featured */
+.imp-scen{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;align-items:start}
+.imp-card{border:1px solid var(--line);border-radius:14px;padding:14px 16px;background:var(--surface)}
+.imp-card.feat{border-color:var(--fc);background:var(--fc-soft);box-shadow:0 2px 10px rgba(0,0,0,.05)}
+.imp-card-h{font-weight:800;font-size:.92rem;margin-bottom:10px;padding-bottom:9px;border-bottom:1px solid var(--line)}
+.imp-card.feat .imp-card-h{border-bottom-color:color-mix(in srgb,var(--fc) 35%,transparent);color:var(--fc-ink)}
+.imp-star{color:var(--fc-ink)}
+.imp-row{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:5px 0;font-size:.84rem;color:var(--muted)}
+.imp-row+.imp-row{border-top:1px dashed var(--line)}
+.imp-row b{font-size:.96rem;font-weight:800;color:var(--ink);text-align:right}
+.imp-card.feat .imp-row b{color:var(--fc-ink)}
+.imp-how{margin-top:16px}
 .imp-how summary{cursor:pointer;font-weight:700;color:var(--brand);font-size:.9rem}
 .imp-how p{font-size:.86rem;color:var(--muted);margin:8px 0 0;line-height:1.55}
-@media(max-width:560px){.imp-t{font-size:.8rem}.imp-t th,.imp-t td{padding:7px 5px}}
+@media(max-width:860px){.imp-scen{grid-template-columns:1fr}.imp-card.feat{order:-1}}
 
 /* combined guide */
 .know{margin-top:24px}
@@ -567,8 +574,6 @@ details.team>summary:focus-visible{outline:2px solid var(--fc);outline-offset:4p
 html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 img,svg,video{max-width:100%}
 .nav .ni{display:none}
-.tw{overflow-x:auto;-webkit-overflow-scrolling:touch}
-.imp-t{min-width:440px}
 .tools{flex-wrap:wrap}
 .tools .btn{white-space:normal;text-align:center}
 @media (max-width:640px){
@@ -639,7 +644,6 @@ img,svg,video{max-width:100%}
   /* insights */
   .kpis{grid-template-columns:1fr 1fr}
   .imp-in{grid-template-columns:1fr 1fr}
-  .imp-t{font-size:.8rem}
   .ins-bar{flex-wrap:wrap}
 }
 @media (max-width:360px){
@@ -656,16 +660,8 @@ img,svg,video{max-width:100%}
   .top-in{padding-top:0;padding-bottom:0}
 }
 @media (max-width:640px){.top-in{padding:0 14px}}
-@media (max-width:640px){
-  .imp-t{min-width:0;table-layout:fixed;font-size:.78rem}
-  .imp-t th:first-child{width:36%}
-  .imp-t thead th{font-size:.6rem;letter-spacing:.02em;padding:6px 3px}
-  .imp-t th,.imp-t td{padding:8px 4px}
-  .imp-t td.b{border-radius:0}
-}
-@media (max-width:640px){.imp-t td{white-space:nowrap;font-size:.74rem}.imp-t td.b{font-size:.8rem}.imp-t th:first-child{width:31%}}
-/* quick-look panel: matching scrollbar in dark mode, a little tighter so the text fits */
-.pcard .quick{scrollbar-width:thin;scrollbar-color:var(--line) transparent;font-size:.78rem;line-height:1.32}
+/* quick-look panel: matching scrollbar in dark mode */
+.pcard .quick{scrollbar-width:thin;scrollbar-color:var(--line) transparent;font-size:.96rem;line-height:1.4}
 :root[data-theme="dark"] .pcard .quick{color-scheme:dark}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .pcard .quick{color-scheme:dark}}
 @media (hover:none){.pcard .qbtn,.pcard .quick{display:none}}
@@ -674,13 +670,13 @@ img,svg,video{max-width:100%}
 .pcard .ph img,.pp .big img,.slide .pics img{object-fit:contain}
 /* quick look: text scales with the card so it fits without a scrollbar */
 .pcard .phw{container-type:inline-size}
-.pcard .quick{font-size:clamp(.58rem,3.55cqw,.8rem);line-height:1.3;padding:clamp(8px,4cqw,14px) clamp(30px,14cqw,46px) clamp(6px,3cqw,12px) clamp(10px,5cqw,16px);scrollbar-width:none}
+.pcard .quick{font-size:clamp(.84rem,5.6cqw,1.04rem);line-height:1.22;padding:clamp(6px,3cqw,12px) clamp(30px,14cqw,46px) clamp(5px,2.4cqw,10px) clamp(10px,5cqw,16px);scrollbar-width:none;overflow-y:auto}
 .pcard .quick::-webkit-scrollbar{display:none}
-.pcard .qt{font-size:clamp(.72rem,4.6cqw,.95rem);margin-bottom:clamp(2px,1.6cqw,6px)}
-.pcard .qk{font-size:clamp(.54rem,2.9cqw,.66rem)}
-.pcard .quick p{margin:0 0 clamp(2px,1.6cqw,6px)}
-.pcard .quick ul{margin:0 0 clamp(2px,1.6cqw,6px)}
-.pcard .qm{font-size:clamp(.62rem,3.4cqw,.8rem)}
+.pcard .qt{font-size:clamp(1rem,6.6cqw,1.2rem);margin-bottom:clamp(1px,1cqw,4px)}
+.pcard .qk{font-size:clamp(.76rem,4.4cqw,.9rem)}
+.pcard .quick p{margin:0 0 clamp(1px,1cqw,4px)}
+.pcard .quick ul{margin:0 0 clamp(1px,1cqw,4px)}
+.pcard .qm{font-size:clamp(.88rem,5cqw,1.04rem)}
 
 /* ============ Insights revamp: compact dashboard ============ */
 .kpis{gap:10px;margin-bottom:12px}
