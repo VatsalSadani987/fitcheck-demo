@@ -149,7 +149,7 @@
   var timer = null, lastTotal = '', lastData = null, notesOpen = false; // whether the viewer has the Anonymous notes card open, kept across live redraws
 
   function view() {
-    return '<span class="eyebrow"><span class="fcdot"></span>FitCheck Insights</span><h1 style="margin-top:8px">What the Be.Bodywise team would see</h1><span class="muted" style="font-size:.72rem">build 15</span>' +
+    return '<span class="eyebrow"><span class="fcdot"></span>FitCheck Insights</span><h1 style="margin-top:8px">What the Be.Bodywise team would see</h1><span class="muted" style="font-size:.72rem">build 19</span>' +
       '<p class="muted" style="max-width:48em">Anonymous answers only: no names, no phone numbers. Every WhatsApp or browser check-in updates the Live tab in seconds.</p>' +
       '<div class="ins-bar"><div class="seg" role="tablist"><button class="on" data-seg="live" role="tab" type="button">Live demo sessions</button><button data-seg="sample" role="tab" type="button">Sample data</button></div><span id="segTag"></span><span class="muted" id="stamp" style="font-size:.82rem"></span></div>' +
       '<div id="insBody"></div>';
@@ -201,7 +201,8 @@
     ['NPS', 'nps', function (x) { return '+' + f1(x) + ' pts'; }],
     ['Extra revenue', 'revenue', function (x) { return inr(x) + '/mo'; }],
     ['Contribution profit', 'profit', function (x) { return inr(x) + '/mo'; }],
-    ['CAC saved (re-acquisition avoided)', 'cacSaved', function (x) { return inr(x) + '/mo'; }]
+    ['CAC saved (re-acquisition avoided)', 'cacSaved', function (x) { return inr(x) + '/mo'; }],
+    ['Saving per buyer kept, per month', 'perCustomer', function (x) { return inr(x); }]
   ];
   function impactOut(c, sample) {
     var V = window.FitVariance, usedSample = false, src = c;
