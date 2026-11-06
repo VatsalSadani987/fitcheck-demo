@@ -176,6 +176,40 @@
     lotion: { weeks: [12, 16], en: '3 to 4 months', hi: '3 se 4 mahine' }
   };
   Object.keys(STATED).forEach(function (k) { PRODUCTS[k].stated = STATED[k]; });
+  /* Three short, playful reminders sent before the check-in (demo-compressed; see lib/engine.js), one per routine day. */
+  var REMINDERS = {
+    sa1: {
+      day2: { en: 'Your body wash called. Consistency looks good on you. 👀 Don’t ghost your routine!', hi: 'Aapka body wash call kar raha hai. Consistency aap par suit karti hai. 👀 Apni routine ko ghost mat kijiye!' },
+      day5: { en: 'Your shower routine called. Have you met today?', hi: 'Aapki shower routine call kar rahi hai. Aaj mile the kya?' },
+      day8: { en: 'Your body wash is checking in. How’s the routine going? 💚', hi: 'Aapka body wash check-in kar raha hai. Routine kaisi chal rahi hai? 💚' }
+    },
+    aha5: {
+      day2: { en: 'Your shower routine wants its glow-up partner back. ✨', hi: 'Aapki shower routine apna glow-up partner wapas chahti hai. ✨' },
+      day5: { en: 'A little consistency goes a long way. Your body wash agrees!', hi: 'Thodi consistency bahut kaam aati hai. Aapka body wash bhi yahi kehta hai!' },
+      day8: { en: 'Your shower routine called again. How’s it going? 💚', hi: 'Aapki shower routine phir se call kar rahi hai. Kaisa chal raha hai? 💚' }
+    },
+    roll: {
+      day2: { en: 'Don’t let your roll-on become a bathroom shelf decoration! 😉', hi: 'Apne roll-on ko bathroom shelf ka decoration mat banne dijiye! 😉' },
+      day5: { en: 'Your skincare routine deserves a wingman.', hi: 'Aapki skincare routine ko ek wingman chahiye.' },
+      day8: { en: 'Your roll-on is checking in. How’s the experience? 💚', hi: 'Aapka roll-on check-in kar raha hai. Experience kaisa raha? 💚' }
+    },
+    lotion: {
+      day2: { en: 'Breaking news: Your skin has requested some attention. 📰', hi: 'Breaking news: Aapki skin ne thoda attention maanga hai. 📰' },
+      day5: { en: 'Don’t let moisturising become a once-in-a-blue-moon activity!', hi: 'Moisturise karna kabhi-kabhi ka kaam mat banaiye!' },
+      day8: { en: 'Your lotion wants to know how things are going. 💚', hi: 'Aapka lotion jaanna chahta hai sab kaisa chal raha hai. 💚' }
+    },
+    gum: {
+      day2: { en: 'Your hair-care routine has entered the group chat. 💬', hi: 'Aapki hair-care routine group chat mein aa gayi hai. 💬' },
+      day5: { en: 'Consistency is the assignment. Your routine is the main character. 💜', hi: 'Consistency hi assignment hai. Aapki routine iski main character hai. 💜' },
+      day8: { en: 'The hair-care group chat is checking in. How’s it going?', hi: 'Hair-care group chat check-in kar rahi hai. Kaisa chal raha hai?' }
+    },
+    serum: {
+      day2: { en: 'Your hair-care routine just sent a follow request. 🌱', hi: 'Aapki hair-care routine ne abhi follow request bheji hai. 🌱' },
+      day5: { en: 'Don’t let your routine go MIA!', hi: 'Apni routine ko MIA mat hone dijiye!' },
+      day8: { en: 'Your serum is checking in. How’s the routine going? 💚', hi: 'Aapka serum check-in kar raha hai. Routine kaisi chal rahi hai? 💚' }
+    }
+  };
+  Object.keys(REMINDERS).forEach(function (k) { PRODUCTS[k].reminders = REMINDERS[k]; });
   /* "When do you expect to notice a change?" buckets. upper = the longest wait (in weeks) the person is willing to expect. */
   var TIMES = [
     { id: 'w2', en: 'Within 2 weeks', hi: '2 hafte ke andar', upper: 2 },
