@@ -670,13 +670,13 @@ img,svg,video{max-width:100%}
 .pcard .ph img,.pp .big img,.slide .pics img{object-fit:contain}
 /* quick look: text scales with the card so it fits without a scrollbar */
 .pcard .phw{container-type:inline-size}
-.pcard .quick{font-size:clamp(.84rem,5.6cqw,1.04rem);line-height:1.22;padding:clamp(6px,3cqw,12px) clamp(30px,14cqw,46px) clamp(5px,2.4cqw,10px) clamp(10px,5cqw,16px);scrollbar-width:none;overflow-y:auto}
+.pcard .quick{font-size:clamp(.78rem,5.1cqw,.96rem);line-height:1.24;padding:clamp(6px,3cqw,12px) clamp(30px,14cqw,46px) clamp(5px,2.4cqw,10px) clamp(10px,5cqw,16px);scrollbar-width:none;overflow-y:auto}
 .pcard .quick::-webkit-scrollbar{display:none}
-.pcard .qt{font-size:clamp(1rem,6.6cqw,1.2rem);margin-bottom:clamp(1px,1cqw,4px)}
-.pcard .qk{font-size:clamp(.76rem,4.4cqw,.9rem)}
+.pcard .qt{font-size:clamp(.92rem,6cqw,1.1rem);margin-bottom:clamp(1px,1cqw,4px)}
+.pcard .qk{font-size:clamp(.7rem,4cqw,.82rem)}
 .pcard .quick p{margin:0 0 clamp(1px,1cqw,4px)}
 .pcard .quick ul{margin:0 0 clamp(1px,1cqw,4px)}
-.pcard .qm{font-size:clamp(.88rem,5cqw,1.04rem)}
+.pcard .qm{font-size:clamp(.82rem,4.6cqw,.96rem)}
 
 /* ============ Insights revamp: compact dashboard ============ */
 .kpis{gap:10px;margin-bottom:12px}
